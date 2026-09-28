@@ -1,3 +1,4 @@
+
 // =========================
 // HIRAGANA DATA
 // =========================
@@ -62,6 +63,7 @@ const hiragana = [
 ];
 
 
+
 // =========================
 // VARIABLES
 // =========================
@@ -69,44 +71,72 @@ const hiragana = [
 let selectedCards = [];
 
 let quizQuestions = [];
+
 let currentQuestion = 0;
+
 let score = 0;
 
 let quizMode = "jp-romaji";
+
+let practiceMode = "normal";
+
 
 
 // =========================
 // ELEMENTS
 // =========================
 
-const selectionScreen = document.getElementById("selectionScreen");
-const quizScreen = document.getElementById("quizScreen");
+const selectionScreen =
+    document.getElementById("selectionScreen");
 
-const chart = document.getElementById("hiraganaChart");
+const quizScreen =
+    document.getElementById("quizScreen");
 
-const selectedCount = document.getElementById("selectedCount");
+const chart =
+    document.getElementById("hiraganaChart");
 
-const selectAllButton = document.getElementById("selectAll");
-const clearAllButton = document.getElementById("clearAll");
+const selectedCount =
+    document.getElementById("selectedCount");
 
-const startQuizButton = document.getElementById("startQuiz");
+const selectAllButton =
+    document.getElementById("selectAll");
 
-const quizModeSelect = document.getElementById("quizMode");
+const clearAllButton =
+    document.getElementById("clearAll");
 
-const backButton = document.getElementById("backButton");
+const startQuizButton =
+    document.getElementById("startQuiz");
 
-const questionNumber = document.getElementById("questionNumber");
-const scoreDisplay = document.getElementById("score");
+const quizModeSelect =
+    document.getElementById("quizMode");
 
-const questionDisplay = document.getElementById("question");
+const practiceModeSelect =
+    document.getElementById("practiceMode");
 
-const answerInput = document.getElementById("answerInput");
+const backButton =
+    document.getElementById("backButton");
 
-const checkAnswerButton = document.getElementById("checkAnswer");
+const questionNumber =
+    document.getElementById("questionNumber");
 
-const feedback = document.getElementById("feedback");
+const scoreDisplay =
+    document.getElementById("score");
 
-const nextQuestionButton = document.getElementById("nextQuestion");
+const questionDisplay =
+    document.getElementById("question");
+
+const answerInput =
+    document.getElementById("answerInput");
+
+const checkAnswerButton =
+    document.getElementById("checkAnswer");
+
+const feedback =
+    document.getElementById("feedback");
+
+const nextQuestionButton =
+    document.getElementById("nextQuestion");
+
 
 
 // =========================
@@ -128,13 +158,15 @@ function createChart() {
             <span class="romaji">${item.romaji}</span>
         `;
 
+
         card.addEventListener("click", () => {
 
             if (selectedCards.includes(index)) {
 
-                selectedCards = selectedCards.filter(
-                    i => i !== index
-                );
+                selectedCards =
+                    selectedCards.filter(
+                        i => i !== index
+                    );
 
                 card.classList.remove("selected");
 
@@ -148,9 +180,11 @@ function createChart() {
             updateSelectedCount();
         });
 
+
         chart.appendChild(card);
     });
 }
+
 
 
 // =========================
@@ -164,22 +198,29 @@ function updateSelectedCount() {
 }
 
 
+
 // =========================
 // SELECT ALL
 // =========================
 
 selectAllButton.addEventListener("click", () => {
 
-    selectedCards = hiragana.map((_, index) => index);
+    selectedCards =
+        hiragana.map((_, index) => index);
+
 
     document
         .querySelectorAll(".hiragana-card")
         .forEach(card => {
+
             card.classList.add("selected");
+
         });
+
 
     updateSelectedCount();
 });
+
 
 
 // =========================
@@ -190,14 +231,19 @@ clearAllButton.addEventListener("click", () => {
 
     selectedCards = [];
 
+
     document
         .querySelectorAll(".hiragana-card")
         .forEach(card => {
+
             card.classList.remove("selected");
+
         });
+
 
     updateSelectedCount();
 });
+
 
 
 // =========================
@@ -208,16 +254,33 @@ function shuffle(array) {
 
     const shuffled = [...array];
 
-    for (let i = shuffled.length - 1; i > 0; i--) {
 
-        const j = Math.floor(Math.random() * (i + 1));
+    for (
+        let i = shuffled.length - 1;
+        i > 0;
+        i--
+    ) {
 
-        [shuffled[i], shuffled[j]] =
-            [shuffled[j], shuffled[i]];
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+
+        [
+            shuffled[i],
+            shuffled[j]
+        ] =
+        [
+            shuffled[j],
+            shuffled[i]
+        ];
     }
+
 
     return shuffled;
 }
+
 
 
 // =========================
@@ -228,28 +291,61 @@ startQuizButton.addEventListener("click", () => {
 
     if (selectedCards.length === 0) {
 
-        alert("Please select at least one hiragana.");
+        alert(
+            "Please select at least one hiragana."
+        );
 
         return;
     }
 
-    quizMode = quizModeSelect.value;
 
-    quizQuestions = shuffle(
-        selectedCards.map(index => hiragana[index])
-    );
+    quizMode =
+        quizModeSelect.value;
+
+
+    practiceMode =
+        practiceModeSelect.value;
+
+
+    quizQuestions =
+        shuffle(
+            selectedCards.map(
+                index => hiragana[index]
+            )
+        );
+
 
     currentQuestion = 0;
+
     score = 0;
 
+
     // Switch screens
+
     selectionScreen.classList.add("hidden");
+
     quizScreen.classList.remove("hidden");
+
+
+    // Change button depending on mode
+
+    if (practiceMode === "endless") {
+
+        nextQuestionButton.textContent =
+            "Next Practice →";
+
+    } else {
+
+        nextQuestionButton.textContent =
+            "Next Question →";
+    }
+
 
     showQuestion();
 
     answerInput.focus();
 });
+
 
 
 // =========================
@@ -258,13 +354,27 @@ startQuizButton.addEventListener("click", () => {
 
 function showQuestion() {
 
-    const current = quizQuestions[currentQuestion];
+    const current =
+        quizQuestions[currentQuestion];
 
-    questionNumber.textContent =
-        `Question ${currentQuestion + 1} / ${quizQuestions.length}`;
+
+    // Header
+
+    if (practiceMode === "endless") {
+
+        questionNumber.textContent =
+            `Practice #${currentQuestion + 1}`;
+
+    } else {
+
+        questionNumber.textContent =
+            `Question ${currentQuestion + 1} / ${quizQuestions.length}`;
+    }
+
 
     scoreDisplay.textContent =
         `Score: ${score}`;
+
 
     feedback.textContent = "";
 
@@ -274,49 +384,78 @@ function showQuestion() {
 
     checkAnswerButton.disabled = false;
 
+
     nextQuestionButton.classList.add("hidden");
+
+
+    // Display question
 
     if (quizMode === "jp-romaji") {
 
-        questionDisplay.textContent = current.jp;
+        questionDisplay.textContent =
+            current.jp;
 
     } else {
 
-        questionDisplay.textContent = current.romaji;
+        questionDisplay.textContent =
+            current.romaji;
     }
 }
+
 
 
 // =========================
 // CHECK ANSWER
 // =========================
 
-checkAnswerButton.addEventListener("click", checkAnswer);
+checkAnswerButton.addEventListener(
+    "click",
+    checkAnswer
+);
 
 
 function checkAnswer() {
 
-    const current = quizQuestions[currentQuestion];
+    if (answerInput.disabled) {
+        return;
+    }
+
+
+    const current =
+        quizQuestions[currentQuestion];
+
 
     const userAnswer =
-        answerInput.value.trim().toLowerCase();
+        answerInput.value
+            .trim()
+            .toLowerCase();
+
 
     let correctAnswer;
 
+
     if (quizMode === "jp-romaji") {
 
-        correctAnswer = current.romaji;
+        correctAnswer =
+            current.romaji;
 
     } else {
 
-        correctAnswer = current.jp;
+        correctAnswer =
+            current.jp;
     }
 
-    if (userAnswer === correctAnswer.toLowerCase()) {
+
+    if (
+        userAnswer ===
+        correctAnswer.toLowerCase()
+    ) {
 
         score++;
 
-        feedback.textContent = "Correct! ✓";
+
+        feedback.textContent =
+            "Correct! ✓";
 
     } else {
 
@@ -324,42 +463,102 @@ function checkAnswer() {
             `Not quite. The answer is ${correctAnswer}`;
     }
 
+
     scoreDisplay.textContent =
         `Score: ${score}`;
+
 
     answerInput.disabled = true;
 
     checkAnswerButton.disabled = true;
 
-    nextQuestionButton.classList.remove("hidden");
+
+    nextQuestionButton.classList.remove(
+        "hidden"
+    );
+
 
     nextQuestionButton.focus();
 }
+
 
 
 // =========================
 // NEXT QUESTION
 // =========================
 
-nextQuestionButton.addEventListener("click", () => {
+nextQuestionButton.addEventListener(
+    "click",
+    nextQuestion
+);
+
+
+function nextQuestion() {
 
     currentQuestion++;
 
-    if (currentQuestion >= quizQuestions.length) {
+
+    // =========================
+    // ENDLESS PRACTICE
+    // =========================
+
+    if (practiceMode === "endless") {
+
+        /*
+         * When we reach the end of the
+         * current shuffled list, create
+         * another shuffled list.
+         */
+
+        if (
+            currentQuestion >=
+            quizQuestions.length
+        ) {
+
+            quizQuestions =
+                shuffle(
+                    selectedCards.map(
+                        index => hiragana[index]
+                    )
+                );
+
+
+            currentQuestion = 0;
+        }
+
+
+        showQuestion();
+
+        answerInput.focus();
+
+        return;
+    }
+
+
+    // =========================
+    // NORMAL QUIZ
+    // =========================
+
+    if (
+        currentQuestion >=
+        quizQuestions.length
+    ) {
 
         finishQuiz();
 
         return;
     }
 
+
     showQuestion();
 
     answerInput.focus();
-});
+}
+
 
 
 // =========================
-// FINISH QUIZ
+// FINISH NORMAL QUIZ
 // =========================
 
 function finishQuiz() {
@@ -367,28 +566,40 @@ function finishQuiz() {
     questionDisplay.textContent =
         "Finished! 🎉";
 
+
     questionNumber.textContent =
         "Quiz Complete";
+
 
     scoreDisplay.textContent =
         `Score: ${score} / ${quizQuestions.length}`;
 
+
     feedback.textContent =
         "Nice work! Keep practicing.";
+
 
     answerInput.classList.add("hidden");
 
     checkAnswerButton.classList.add("hidden");
 
+
     nextQuestionButton.textContent =
         "Back to Selection";
 
-    nextQuestionButton.classList.remove("hidden");
+
+    nextQuestionButton.classList.remove(
+        "hidden"
+    );
+
 
     nextQuestionButton.disabled = false;
 
-    nextQuestionButton.onclick = returnToSelection;
+
+    nextQuestionButton.onclick =
+        returnToSelection;
 }
+
 
 
 // =========================
@@ -401,86 +612,135 @@ function returnToSelection() {
 
     selectionScreen.classList.remove("hidden");
 
+
     answerInput.classList.remove("hidden");
 
     checkAnswerButton.classList.remove("hidden");
 
+
     nextQuestionButton.textContent =
         "Next Question →";
 
-    nextQuestionButton.onclick = null;
+
+    nextQuestionButton.classList.add(
+        "hidden"
+    );
+
+
+    nextQuestionButton.onclick =
+        null;
+
 
     createChart();
 
-    // Restore selected cards visually
-    selectedCards.forEach(index => {
 
-        const cards =
-            document.querySelectorAll(".hiragana-card");
+    restoreSelectedCards();
 
-        if (cards[index]) {
-            cards[index].classList.add("selected");
-        }
-    });
 
     updateSelectedCount();
 }
+
+
+
+// =========================
+// RESTORE SELECTED CARDS
+// =========================
+
+function restoreSelectedCards() {
+
+    const cards =
+        document.querySelectorAll(
+            ".hiragana-card"
+        );
+
+
+    selectedCards.forEach(index => {
+
+        if (cards[index]) {
+
+            cards[index].classList.add(
+                "selected"
+            );
+        }
+    });
+}
+
 
 
 // =========================
 // BACK BUTTON
 // =========================
 
-backButton.addEventListener("click", () => {
+backButton.addEventListener(
+    "click",
+    () => {
 
-    quizScreen.classList.add("hidden");
+        quizScreen.classList.add("hidden");
 
-    selectionScreen.classList.remove("hidden");
+        selectionScreen.classList.remove("hidden");
 
-    answerInput.classList.remove("hidden");
 
-    checkAnswerButton.classList.remove("hidden");
+        answerInput.classList.remove("hidden");
 
-    nextQuestionButton.textContent =
-        "Next Question →";
+        checkAnswerButton.classList.remove(
+            "hidden"
+        );
 
-    nextQuestionButton.classList.add("hidden");
 
-    createChart();
+        nextQuestionButton.textContent =
+            "Next Question →";
 
-    selectedCards.forEach(index => {
 
-        const cards =
-            document.querySelectorAll(".hiragana-card");
+        nextQuestionButton.classList.add(
+            "hidden"
+        );
 
-        if (cards[index]) {
-            cards[index].classList.add("selected");
-        }
-    });
 
-    updateSelectedCount();
-});
+        nextQuestionButton.onclick =
+            null;
+
+
+        createChart();
+
+
+        restoreSelectedCards();
+
+
+        updateSelectedCount();
+    }
+);
+
 
 
 // =========================
 // ENTER KEY
 // =========================
 
-answerInput.addEventListener("keydown", (event) => {
+answerInput.addEventListener(
+    "keydown",
+    (event) => {
 
-    if (event.key !== "Enter") {
-        return;
+        if (event.key !== "Enter") {
+
+            return;
+        }
+
+
+        if (!answerInput.disabled) {
+
+            checkAnswer();
+
+        } else if (
+            !nextQuestionButton.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            nextQuestionButton.click();
+        }
     }
+);
 
-    if (!answerInput.disabled) {
-
-        checkAnswer();
-
-    } else if (!nextQuestionButton.classList.contains("hidden")) {
-
-        nextQuestionButton.click();
-    }
-});
 
 
 // =========================
@@ -488,4 +748,5 @@ answerInput.addEventListener("keydown", (event) => {
 // =========================
 
 createChart();
+
 updateSelectedCount();
