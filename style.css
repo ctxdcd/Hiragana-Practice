@@ -434,36 +434,117 @@ h1 {
 
 
 
+
 /* =========================
-   MOBILE
+   MOBILE / PHONE
    ========================= */
 
 @media (max-width: 600px) {
 
-    #hiraganaChart {
-        grid-template-columns: repeat(3, 1fr);
-    }
+    /* =========================
+       SELECTION SCREEN
+       ========================= */
 
-
-    .quiz-container {
-        min-height: 550px;
-
-        padding: 22px;
-    }
-
-
-    #question {
-        font-size: 65px;
-    }
-
-
-    .answer-area {
-        flex-direction: column;
-    }
-
-
-    #checkAnswer {
+    .selection-container {
         width: 100%;
+
+        padding: 25px 12px 40px;
+    }
+
+
+    h1 {
+        font-size: 28px;
+
+        margin-bottom: 6px;
+    }
+
+
+    .subtitle {
+        font-size: 14px;
+
+        margin-bottom: 15px;
+    }
+
+
+    /* =========================
+       SELECTION BUTTONS
+       ========================= */
+
+    .selection-controls {
+        margin: 15px 0 8px;
+    }
+
+
+    .selection-controls button {
+        padding: 9px 14px;
+
+        font-size: 14px;
+
+        margin: 3px;
+    }
+
+
+    #selectedCount {
+        font-size: 14px;
+
+        margin-bottom: 15px;
+    }
+
+
+    /* =========================
+       HIRAGANA CHART
+       ========================= */
+
+    #hiraganaChart {
+        grid-template-columns:
+            repeat(3, 1fr);
+
+        gap: 7px;
+
+        width: 100%;
+    }
+
+
+    .hiragana-card {
+        padding: 13px 5px;
+
+        border-radius: 9px;
+
+        border-width: 2px;
+    }
+
+
+    .hiragana-card .japanese {
+        font-size: 28px;
+
+        margin-bottom: 3px;
+    }
+
+
+    .hiragana-card .romaji {
+        font-size: 12px;
+    }
+
+
+    /* =========================
+       START AREA
+       ========================= */
+
+    .start-container {
+        margin-top: 20px;
+
+        padding: 18px 15px;
+
+        border-radius: 12px;
+    }
+
+
+    .start-container label {
+        display: block;
+
+        margin: 0 0 6px;
+
+        font-size: 14px;
     }
 
 
@@ -471,15 +552,140 @@ h1 {
     #practiceMode {
         width: 100%;
 
-        margin: 5px 0;
+        padding: 11px;
+
+        margin: 0 0 14px;
+
+        font-size: 14px;
     }
 
 
     .mode-label {
-        display: block;
-
-        margin-top: 15px;
+        margin-top: 3px;
     }
 
+
+    .start-button {
+        width: 100%;
+
+        margin-top: 5px;
+
+        padding: 13px;
+
+        font-size: 16px;
+    }
+
+
+    /* =========================
+       QUIZ SCREEN
+       ========================= */
+
+    #quizScreen {
+        min-height: 100vh;
+
+        padding: 10px;
+    }
+
+
+    .quiz-container {
+        width: 100%;
+
+        min-height: calc(100vh - 20px);
+
+        padding: 18px 15px;
+
+        border-radius: 14px;
+    }
+
+
+    /* =========================
+       BACK BUTTON
+       ========================= */
+
+    .back-button {
+        font-size: 15px;
+
+        padding: 5px 0;
+    }
+
+
+    /* =========================
+       QUIZ HEADER
+       ========================= */
+
+    .quiz-header {
+        margin-top: 18px;
+
+        font-size: 13px;
+    }
+
+
+    /* =========================
+       QUESTION
+       ========================= */
+
+    .question-box {
+        min-height: 220px;
+
+        flex: 1;
+    }
+
+
+    #question {
+        font-size: 70px;
+    }
+
+
+    /* =========================
+       ANSWER
+       ========================= */
+
+    .answer-area {
+        flex-direction: column;
+
+        gap: 8px;
+    }
+
+
+    #answerInput {
+        width: 100%;
+
+        padding: 14px;
+
+        font-size: 16px;
+    }
+
+
+    #checkAnswer {
+        width: 100%;
+
+        padding: 14px;
+
+        font-size: 16px;
+    }
+
+
+    /* =========================
+       FEEDBACK
+       ========================= */
+
+    #feedback {
+        min-height: 24px;
+
+        font-size: 14px;
+
+        margin: 10px 0;
+    }
+
+
+    /* =========================
+       NEXT BUTTON
+       ========================= */
+
+    .next-button {
+        padding: 14px;
+
+        font-size: 16px;
+    }
 }
 
