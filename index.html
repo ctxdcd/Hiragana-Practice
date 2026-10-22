@@ -12,12 +12,8 @@
 
 <body>
 
-    <!-- =========================
-         HIRAGANA SELECTION SCREEN
-         ========================= -->
-
+    <!-- HIRAGANA SELECTION SCREEN -->
     <div id="selectionScreen" class="screen">
-
         <main class="selection-container">
 
             <h1>Hiragana Quiz</h1>
@@ -26,144 +22,78 @@
                 Select the hiragana you want to practice.
             </p>
 
-
             <div class="selection-controls">
-
-                <button id="selectAll">
-                    Select All
-                </button>
-
-                <button id="clearAll">
-                    Clear All
-                </button>
-
+                <button id="selectAll" type="button">Select All</button>
+                <button id="clearAll" type="button">Clear All</button>
             </div>
 
-
-            <p id="selectedCount">
-                0 selected
-            </p>
-
+            <p id="selectedCount">0 selected</p>
 
             <div id="hiraganaChart"></div>
 
-
             <div class="start-container">
 
-                <label for="quizMode">
-                    Quiz Mode:
-                </label>
+                <label for="quizMode">Quiz Mode:</label>
 
                 <select id="quizMode">
-
-                    <option value="jp-romaji">
-                        Japanese → Romaji
-                    </option>
-
-                    <option value="romaji-jp">
-                        Romaji → Japanese
-                    </option>
-
+                    <option value="jp-romaji">Japanese → Romaji</option>
+                    <option value="romaji-jp">Romaji → Japanese</option>
                 </select>
 
-
-                <label for="practiceMode" class="mode-label">
-                    Practice Type:
-                </label>
-
-                <select id="practiceMode">
-
-                    <option value="normal">
-                        Normal Quiz
-                    </option>
-
-                    <option value="endless">
-                        Endless Practice
-                    </option>
-
-                </select>
-
-
-                <button id="startQuiz" class="start-button">
-                    Start Quiz
+                <button id="startQuiz" class="start-button" type="button">
+                    Start Endless Practice
                 </button>
 
             </div>
 
         </main>
-
     </div>
 
 
-
-    <!-- =========================
-         QUIZ SCREEN
-         ========================= -->
-
+    <!-- QUIZ SCREEN -->
     <div id="quizScreen" class="screen hidden">
-
         <main class="quiz-container">
 
-
-            <button id="backButton" class="back-button">
-                ← Back
+            <button id="backButton" class="back-button" type="button">
+                ← Back to Selection
             </button>
 
-
             <div class="quiz-header">
+                <span id="questionNumber">Practice #1</span>
 
-                <span id="questionNumber">
-                    Question 1 / 1
-                </span>
-
-                <span id="score">
-                    Score: 0
-                </span>
-
+                <div class="answer-stats">
+                    <span class="true-stat">T: <span id="trueCount">0</span></span>
+                    <span class="false-stat">F: <span id="falseCount">0</span></span>
+                </div>
             </div>
-
 
             <div class="question-box">
-
                 <p id="question"></p>
-
             </div>
 
-
             <div class="answer-area">
-
                 <input
                     type="text"
                     id="answerInput"
                     placeholder="Type your answer..."
                     autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    enterkeyhint="done"
                 >
 
-                <button id="checkAnswer">
+                <button id="checkAnswer" type="button">
                     Check Answer
                 </button>
-
             </div>
 
-
-            <p id="feedback"></p>
-
-
-            <button
-                id="nextQuestion"
-                class="next-button hidden"
-            >
-                Next Question →
-            </button>
-
+            <!-- Result message appears here -->
+            <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
 
         </main>
-
     </div>
-
 
     <script src="script.js"></script>
 
 </body>
 </html>
-

@@ -35,18 +35,13 @@ button:disabled {
     opacity: 0.6;
 }
 
-
-/* =========================
-   SCREEN SYSTEM
-   ========================= */
+.hidden {
+    display: none !important;
+}
 
 .screen {
     min-height: 100vh;
     min-height: 100dvh;
-}
-
-.hidden {
-    display: none !important;
 }
 
 
@@ -63,18 +58,13 @@ button:disabled {
 }
 
 h1 {
-    margin-bottom: 8px;
+    margin: 0 0 8px;
 }
 
 .subtitle {
     color: #666;
     margin-top: 0;
 }
-
-
-/* =========================
-   SELECTION BUTTONS
-   ========================= */
 
 .selection-controls {
     margin: 25px 0 10px;
@@ -115,7 +105,7 @@ h1 {
     border: 2px solid #ddd;
     border-radius: 12px;
     padding: 20px 10px;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, background 0.15s;
 }
 
 .hiragana-card:hover {
@@ -123,8 +113,8 @@ h1 {
 }
 
 .hiragana-card .japanese {
-    font-size: 32px;
     display: block;
+    font-size: 32px;
     margin-bottom: 5px;
 }
 
@@ -132,11 +122,6 @@ h1 {
     font-size: 14px;
     color: #777;
 }
-
-
-/* =========================
-   SELECTED CARD
-   ========================= */
 
 .hiragana-card.selected {
     border-color: #333;
@@ -156,30 +141,33 @@ h1 {
 }
 
 .start-container label {
-    margin-right: 8px;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
 }
 
-#quizMode,
-#practiceMode {
+#quizMode {
+    width: 100%;
+    max-width: 320px;
+    min-height: 46px;
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    margin-right: 12px;
-}
-
-.mode-label {
-    margin-left: 5px;
+    background: #f8f8f8;
+    font-size: 15px;
 }
 
 .start-button {
     display: block;
     margin: 20px auto 0;
-    padding: 13px 28px;
+    padding: 14px 28px;
+    min-height: 48px;
     border: none;
     border-radius: 9px;
     background: #222;
     color: white;
     font-size: 16px;
+    font-weight: 600;
 }
 
 .start-button:hover {
@@ -195,17 +183,18 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 25px 15px;
+    padding: 20px 15px;
 }
 
 .quiz-container {
+    position: relative;
+    isolation: isolate;
     width: 100%;
     max-width: 650px;
-    min-height: 600px;
+    min-height: 560px;
+    padding: 25px 30px;
     background: white;
     border-radius: 18px;
-    padding: 30px;
-    position: relative;
     display: flex;
     flex-direction: column;
 }
@@ -230,49 +219,72 @@ h1 {
 
 
 /* =========================
-   QUIZ HEADER
+   QUESTION NUMBER + T/F
    ========================= */
 
 .quiz-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 12px;
-    margin-top: 25px;
+    margin-top: 24px;
     color: #666;
+    font-size: 14px;
+}
+
+.answer-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.true-stat {
+    color: #218348;
+}
+
+.false-stat {
+    color: #cf3434;
 }
 
 
 /* =========================
-   QUESTION
+   QUESTION AREA
+   Keep its size stable.
    ========================= */
 
 .question-box {
-    flex: 1;
+    height: 260px;
+    min-height: 260px;
+    flex: none;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 250px;
 }
 
 #question {
     font-size: 80px;
     margin: 0;
     text-align: center;
+    overflow-wrap: anywhere;
 }
 
 
 /* =========================
-   ANSWER
+   ANSWER INPUT
    ========================= */
 
 .answer-area {
     display: flex;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 #answerInput {
     flex: 1;
     min-width: 0;
+    min-height: 48px;
     padding: 14px;
     border: 2px solid #ddd;
     border-radius: 9px;
@@ -280,9 +292,6 @@ h1 {
     outline: none;
     background: white;
     color: #222;
-
-    /* Prevent mobile browsers from changing
-       the input font size and zooming the page. */
     -webkit-appearance: none;
     appearance: none;
 }
@@ -292,6 +301,7 @@ h1 {
 }
 
 #checkAnswer {
+    min-height: 48px;
     padding: 14px 20px;
     border: none;
     border-radius: 9px;
@@ -306,47 +316,60 @@ h1 {
 
 
 /* =========================
-   FEEDBACK
+   POP-UP FEEDBACK
+   Does not push the layout.
    ========================= */
 
-#feedback {
-    min-height: 44px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.feedback {
+    position: absolute;
+    z-index: 5;
+    top: 47%;
+    left: 50%;
+    width: max-content;
+    max-width: calc(100% - 36px);
+    padding: 16px 22px;
+    border-radius: 12px;
+    background: #222;
+    color: white;
     text-align: center;
-    font-weight: bold;
-    margin: 10px 0;
-}
-
-
-/* =========================
-   NEXT BUTTON
-   ========================= */
-
-.next-button {
-    width: 100%;
-    min-height: 48px;
-    padding: 14px;
-    flex-shrink: 0;
-    border: none;
-    border-radius: 9px;
-    background: #ddd;
     font-size: 16px;
+    font-weight: 700;
+    line-height: 1.5;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -45%) scale(0.95);
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        visibility 0.15s ease;
 }
 
-.next-button:hover {
-    background: #ccc;
+.feedback.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.feedback.correct {
+    background: #e6f6eb;
+    color: #176b36;
+    border: 1px solid #a9dfb9;
+}
+
+.feedback.wrong {
+    background: #fff0f0;
+    color: #a82020;
+    border: 1px solid #efb4b4;
 }
 
 
 /* =========================
-   MOBILE / PHONE
+   MOBILE
    ========================= */
 
 @media (max-width: 600px) {
-
-    /* Selection screen */
 
     .selection-container {
         width: 100%;
@@ -355,16 +378,12 @@ h1 {
 
     h1 {
         font-size: 28px;
-        margin-bottom: 6px;
     }
 
     .subtitle {
         font-size: 14px;
         margin-bottom: 15px;
     }
-
-
-    /* Selection buttons */
 
     .selection-controls {
         margin: 15px 0 8px;
@@ -381,11 +400,8 @@ h1 {
         margin-bottom: 15px;
     }
 
-
-    /* Hiragana chart */
-
     #hiraganaChart {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 7px;
         width: 100%;
     }
@@ -404,128 +420,39 @@ h1 {
         font-size: 12px;
     }
 
-
-    /* Start area */
-
-    .start-container {
-        margin-top: 20px;
-        padding: 18px 15px;
-        border-radius: 12px;
-    }
-
-    .start-container label {
-        display: block;
-        margin: 0 0 6px;
-        font-size: 14px;
-    }
-
-    #quizMode,
-    #practiceMode {
-        width: 100%;
-        padding: 11px;
-        margin: 0 0 14px;
-        font-size: 14px;
-    }
-
-    .mode-label {
-        margin-top: 3px;
-    }
-
-    .start-button {
-        width: 100%;
-        margin-top: 5px;
-        padding: 13px;
-        font-size: 16px;
-    }
-
-    
-/* =========================
-   START AREA — MOBILE FIX
-   ========================= */
-
-@media (max-width: 600px) {
-
     .start-container {
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        gap: 0;
-
-        padding: 20px 16px;
         margin-top: 20px;
-
-        text-align: left;
-        background: #fff;
+        padding: 20px 16px;
         border-radius: 14px;
+        text-align: left;
     }
 
     .start-container label {
-        display: block;
         margin: 0 0 8px;
-
         font-size: 14px;
-        font-weight: 600;
-        color: #333;
     }
 
-    #quizMode,
-    #practiceMode {
+    #quizMode {
         display: block;
         width: 100%;
         max-width: 100%;
         min-height: 48px;
-
-        margin: 0 0 20px;
+        margin: 0;
         padding: 12px;
-
         font-size: 15px;
-        color: #222;
-        background-color: #f8f8f8;
-
-        border: 1px solid #d8d8d8;
-        border-radius: 9px;
-    }
-
-    #quizMode:focus,
-    #practiceMode:focus {
-        outline: 2px solid #888;
-        outline-offset: 1px;
-    }
-
-    .mode-label {
-        margin-left: 0;
-        margin-top: 0;
     }
 
     .start-button {
-        display: block;
         width: 100%;
-        min-height: 48px;
-
-        margin: 0;
+        margin: 16px 0 0;
         padding: 14px;
-
-        border: none;
-        border-radius: 9px;
-
-        background: #222;
-        color: #fff;
-
         font-size: 16px;
-        font-weight: 600;
     }
-}
-
-
-
-    /* Quiz screen
-       Avoid vertically centering the card.
-       Keep the card height independent of the
-       changing mobile keyboard viewport. */
 
     #quizScreen {
-        min-height: 100vh;
-        min-height: 100dvh;
         padding: 10px;
         align-items: flex-start;
         justify-content: center;
@@ -534,55 +461,38 @@ h1 {
     .quiz-container {
         width: 100%;
         min-height: 0;
-        height: auto;
         padding: 18px 15px;
         border-radius: 14px;
     }
 
-
-    /* Back button */
-
     .back-button {
-        font-size: 15px;
-        padding: 5px 0;
+        font-size: 14px;
     }
-
-
-    /* Quiz header */
 
     .quiz-header {
         margin-top: 18px;
         font-size: 13px;
     }
 
-
-    /* Fixed question area */
+    .answer-stats {
+        gap: 10px;
+    }
 
     .question-box {
         height: 220px;
         min-height: 220px;
-        flex: none;
     }
 
     #question {
         font-size: 70px;
     }
 
-
-    /* Answer area */
-
     .answer-area {
         flex-direction: column;
         gap: 8px;
     }
 
-    #answerInput {
-        width: 100%;
-        min-height: 48px;
-        padding: 14px;
-        font-size: 16px;
-    }
-
+    #answerInput,
     #checkAnswer {
         width: 100%;
         min-height: 48px;
@@ -590,22 +500,9 @@ h1 {
         font-size: 16px;
     }
 
-
-    /* Feedback */
-
-    #feedback {
-        min-height: 44px;
-        font-size: 14px;
-        margin: 10px 0;
-    }
-
-
-    /* Next button */
-
-    .next-button {
-        min-height: 48px;
-        padding: 14px;
-        font-size: 16px;
+    .feedback {
+        top: 46%;
+        padding: 14px 18px;
+        font-size: 15px;
     }
 }
-
