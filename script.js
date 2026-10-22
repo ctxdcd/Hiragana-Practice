@@ -1,7 +1,7 @@
 
-// =========================
-// HIRAGANA DATA
-// =========================
+/* =========================
+   HIRAGANA DATA
+   ========================= */
 
 const hiragana = [
     { jp: "あ", romaji: "a" },
@@ -63,28 +63,25 @@ const hiragana = [
 ];
 
 
-
-// =========================
-// VARIABLES
-// =========================
+/* =========================
+   VARIABLES
+   ========================= */
 
 let selectedCards = [];
-
 let quizQuestions = [];
-
 let currentQuestion = 0;
-
 let score = 0;
 
 let quizMode = "jp-romaji";
-
 let practiceMode = "normal";
 
+let answered = false;
+let quizFinished = false;
 
 
-// =========================
-// ELEMENTS
-// =========================
+/* =========================
+   ELEMENTS
+   ========================= */
 
 const selectionScreen =
     document.getElementById("selectionScreen");
@@ -138,19 +135,17 @@ const nextQuestionButton =
     document.getElementById("nextQuestion");
 
 
-
-// =========================
-// CREATE HIRAGANA CHART
-// =========================
+/* =========================
+   CREATE HIRAGANA CHART
+   ========================= */
 
 function createChart() {
-
     chart.innerHTML = "";
 
     hiragana.forEach((item, index) => {
-
         const card = document.createElement("button");
 
+        card.type = "button";
         card.className = "hiragana-card";
 
         card.innerHTML = `
@@ -158,595 +153,385 @@ function createChart() {
             <span class="romaji">${item.romaji}</span>
         `;
 
-
         card.addEventListener("click", () => {
-
             if (selectedCards.includes(index)) {
-
-                selectedCards =
-                    selectedCards.filter(
-                        i => i !== index
-                    );
+                selectedCards = selectedCards.filter(
+                    i => i !== index
+                );
 
                 card.classList.remove("selected");
-
             } else {
-
                 selectedCards.push(index);
-
                 card.classList.add("selected");
             }
 
             updateSelectedCount();
         });
 
-
         chart.appendChild(card);
     });
 }
 
 
-
-// =========================
-// SELECTED COUNT
-// =========================
+/* =========================
+   SELECTED COUNT
+   ========================= */
 
 function updateSelectedCount() {
-
     selectedCount.textContent =
         `${selectedCards.length} selected`;
 }
 
 
-
-// =========================
-// SELECT ALL
-// =========================
+/* =========================
+   SELECT ALL
+   ========================= */
 
 selectAllButton.addEventListener("click", () => {
+    selectedCards = hiragana.map((_, index) => index);
 
-    selectedCards =
-        hiragana.map((_, index) => index);
-
-
-    document
-        .querySelectorAll(".hiragana-card")
+    document.querySelectorAll(".hiragana-card")
         .forEach(card => {
-
             card.classList.add("selected");
-
         });
-
 
     updateSelectedCount();
 });
 
 
-
-// =========================
-// CLEAR ALL
-// =========================
+/* =========================
+   CLEAR ALL
+   ========================= */
 
 clearAllButton.addEventListener("click", () => {
-
     selectedCards = [];
 
-
-    document
-        .querySelectorAll(".hiragana-card")
+    document.querySelectorAll(".hiragana-card")
         .forEach(card => {
-
             card.classList.remove("selected");
-
         });
-
 
     updateSelectedCount();
 });
 
 
-
-// =========================
-// SHUFFLE
-// =========================
+/* =========================
+   SHUFFLE
+   ========================= */
 
 function shuffle(array) {
-
     const shuffled = [...array];
 
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(
+            Math.random() * (i + 1)
+        );
 
-    for (
-        let i = shuffled.length - 1;
-        i > 0;
-        i--
-    ) {
-
-        const j =
-            Math.floor(
-                Math.random() * (i + 1)
-            );
-
-
-        [
-            shuffled[i],
-            shuffled[j]
-        ] =
-        [
-            shuffled[j],
-            shuffled[i]
-        ];
+        [shuffled[i], shuffled[j]] =
+            [shuffled[j], shuffled[i]];
     }
-
 
     return shuffled;
 }
 
 
-
-// =========================
-// START QUIZ
-// =========================
+/* =========================
+   START QUIZ
+   ========================= */
 
 startQuizButton.addEventListener("click", () => {
-
     if (selectedCards.length === 0) {
-
-        alert(
-            "Please select at least one hiragana."
-        );
-
+        alert("Please select at least one hiragana.");
         return;
     }
 
+    quizMode = quizModeSelect.value;
+    practiceMode = practiceModeSelect.value;
 
-    quizMode =
-        quizModeSelect.value;
-
-
-    practiceMode =
-        practiceModeSelect.value;
-
-
-    quizQuestions =
-        shuffle(
-            selectedCards.map(
-                index => hiragana[index]
-            )
-        );
-
+    quizQuestions = shuffle(
+        selectedCards.map(index => hiragana[index])
+    );
 
     currentQuestion = 0;
-
     score = 0;
-
-
-    // Switch screens
+    answered = false;
+    quizFinished = false;
 
     selectionScreen.classList.add("hidden");
-
     quizScreen.classList.remove("hidden");
 
+    nextQuestionButton.textContent =
+        practiceMode === "endless"
+            ? "Next Practice →"
+            : "Next Question →";
 
-    // Change button depending on mode
+    nextQuestionButton.disabled = false;
 
-    if (practiceMode === "endless") {
-
-        nextQuestionButton.textContent =
-            "Next Practice →";
-
-    } else {
-
-        nextQuestionButton.textContent =
-            "Next Question →";
-    }
-
+    // Restore the input and answer button.
+    answerInput.classList.remove("hidden");
+    answerInput.disabled = false;
+    checkAnswerButton.classList.remove("hidden");
+    checkAnswerButton.disabled = false;
 
     showQuestion();
 
-    answerInput.focus();
+    // This is triggered by the user's Start Quiz tap.
+    // On Android, this gives the browser a chance to
+    // open the keyboard while the user gesture is active.
+    answerInput.focus({ preventScroll: true });
 });
 
 
-
-// =========================
-// SHOW QUESTION
-// =========================
+/* =========================
+   SHOW QUESTION
+   ========================= */
 
 function showQuestion() {
+    const current = quizQuestions[currentQuestion];
 
-    const current =
-        quizQuestions[currentQuestion];
-
-
-    // Header
+    if (!current) return;
 
     if (practiceMode === "endless") {
-
         questionNumber.textContent =
             `Practice #${currentQuestion + 1}`;
-
     } else {
-
         questionNumber.textContent =
             `Question ${currentQuestion + 1} / ${quizQuestions.length}`;
     }
 
-
-    scoreDisplay.textContent =
-        `Score: ${score}`;
-
+    scoreDisplay.textContent = `Score: ${score}`;
 
     feedback.textContent = "";
 
-    answerInput.value = "";
+    answered = false;
 
+    answerInput.value = "";
     answerInput.disabled = false;
 
     checkAnswerButton.disabled = false;
 
-
     nextQuestionButton.classList.add("hidden");
+    nextQuestionButton.disabled = false;
 
-
-    // Display question
-
-    if (quizMode === "jp-romaji") {
-
-        questionDisplay.textContent =
-            current.jp;
-
-    } else {
-
-        questionDisplay.textContent =
-            current.romaji;
-    }
+    questionDisplay.textContent =
+        quizMode === "jp-romaji"
+            ? current.jp
+            : current.romaji;
 }
 
 
+/* =========================
+   CHECK ANSWER
+   ========================= */
 
-// =========================
-// CHECK ANSWER
-// =========================
-
-checkAnswerButton.addEventListener(
-    "click",
-    checkAnswer
-);
-
+checkAnswerButton.addEventListener("click", checkAnswer);
 
 function checkAnswer() {
+    if (answered || quizFinished) return;
 
-    if (answerInput.disabled) {
+    const current = quizQuestions[currentQuestion];
+
+    const userAnswer = answerInput.value
+        .trim()
+        .toLowerCase();
+
+    if (!userAnswer) {
+        // Keep the user in the answer field.
+        answerInput.focus({ preventScroll: true });
         return;
     }
 
+    const correctAnswer =
+        quizMode === "jp-romaji"
+            ? current.romaji
+            : current.jp;
 
-    const current =
-        quizQuestions[currentQuestion];
+    answered = true;
 
-
-    const userAnswer =
-        answerInput.value
-            .trim()
-            .toLowerCase();
-
-
-    let correctAnswer;
-
-
-    if (quizMode === "jp-romaji") {
-
-        correctAnswer =
-            current.romaji;
-
-    } else {
-
-        correctAnswer =
-            current.jp;
-    }
-
-
-    if (
-        userAnswer ===
-        correctAnswer.toLowerCase()
-    ) {
-
+    if (userAnswer === correctAnswer.toLowerCase()) {
         score++;
-
-
-        feedback.textContent =
-            "Correct! ✓";
-
+        feedback.textContent = "Correct! ✓";
     } else {
-
         feedback.textContent =
             `Not quite. The answer is ${correctAnswer}`;
     }
 
+    scoreDisplay.textContent = `Score: ${score}`;
 
-    scoreDisplay.textContent =
-        `Score: ${score}`;
-
-
-    answerInput.disabled = true;
-
+    // Do not disable or blur the answer input.
+    // The input stays focused so Android has a better
+    // chance of keeping its keyboard visible.
     checkAnswerButton.disabled = true;
 
-
-    nextQuestionButton.classList.remove(
-        "hidden"
-    );
-
-
-    nextQuestionButton.focus();
+    nextQuestionButton.classList.remove("hidden");
 }
 
 
+/* =========================
+   NEXT QUESTION
+   ========================= */
 
-// =========================
-// NEXT QUESTION
-// =========================
-
-nextQuestionButton.addEventListener(
-    "click",
-    nextQuestion
-);
-
+nextQuestionButton.addEventListener("click", nextQuestion);
 
 function nextQuestion() {
+    if (quizFinished) {
+        returnToSelection();
+        return;
+    }
+
+    if (!answered) return;
 
     currentQuestion++;
 
-
-    // =========================
-    // ENDLESS PRACTICE
-    // =========================
+    /* Endless practice */
 
     if (practiceMode === "endless") {
-
-        /*
-         * When we reach the end of the
-         * current shuffled list, create
-         * another shuffled list.
-         */
-
-        if (
-            currentQuestion >=
-            quizQuestions.length
-        ) {
-
-            quizQuestions =
-                shuffle(
-                    selectedCards.map(
-                        index => hiragana[index]
-                    )
-                );
-
+        if (currentQuestion >= quizQuestions.length) {
+            quizQuestions = shuffle(
+                selectedCards.map(index => hiragana[index])
+            );
 
             currentQuestion = 0;
         }
 
-
         showQuestion();
 
-        answerInput.focus();
-
+        // Deliberately do not move focus to another
+        // element or call blur() on the answer input.
         return;
     }
 
+    /* Normal quiz */
 
-    // =========================
-    // NORMAL QUIZ
-    // =========================
-
-    if (
-        currentQuestion >=
-        quizQuestions.length
-    ) {
-
+    if (currentQuestion >= quizQuestions.length) {
         finishQuiz();
-
         return;
     }
-
 
     showQuestion();
-
-    answerInput.focus();
 }
 
 
-
-// =========================
-// FINISH NORMAL QUIZ
-// =========================
+/* =========================
+   FINISH NORMAL QUIZ
+   ========================= */
 
 function finishQuiz() {
+    quizFinished = true;
+    answered = false;
 
-    questionDisplay.textContent =
-        "Finished! 🎉";
+    questionDisplay.textContent = "Finished! 🎉";
 
-
-    questionNumber.textContent =
-        "Quiz Complete";
-
+    questionNumber.textContent = "Quiz Complete";
 
     scoreDisplay.textContent =
         `Score: ${score} / ${quizQuestions.length}`;
 
-
     feedback.textContent =
         "Nice work! Keep practicing.";
 
-
     answerInput.classList.add("hidden");
-
     checkAnswerButton.classList.add("hidden");
 
-
-    nextQuestionButton.textContent =
-        "Back to Selection";
-
-
-    nextQuestionButton.classList.remove(
-        "hidden"
-    );
-
-
+    nextQuestionButton.textContent = "Back to Selection";
+    nextQuestionButton.classList.remove("hidden");
     nextQuestionButton.disabled = false;
-
-
-    nextQuestionButton.onclick =
-        returnToSelection;
 }
 
 
-
-// =========================
-// RETURN TO SELECTION
-// =========================
+/* =========================
+   RETURN TO SELECTION
+   ========================= */
 
 function returnToSelection() {
-
     quizScreen.classList.add("hidden");
-
     selectionScreen.classList.remove("hidden");
 
-
     answerInput.classList.remove("hidden");
+    answerInput.disabled = false;
+    answerInput.value = "";
 
     checkAnswerButton.classList.remove("hidden");
+    checkAnswerButton.disabled = false;
 
+    nextQuestionButton.textContent = "Next Question →";
+    nextQuestionButton.classList.add("hidden");
+    nextQuestionButton.disabled = false;
 
-    nextQuestionButton.textContent =
-        "Next Question →";
-
-
-    nextQuestionButton.classList.add(
-        "hidden"
-    );
-
-
-    nextQuestionButton.onclick =
-        null;
-
+    answered = false;
+    quizFinished = false;
 
     createChart();
-
-
     restoreSelectedCards();
-
-
     updateSelectedCount();
 }
 
 
-
-// =========================
-// RESTORE SELECTED CARDS
-// =========================
+/* =========================
+   RESTORE SELECTED CARDS
+   ========================= */
 
 function restoreSelectedCards() {
-
-    const cards =
-        document.querySelectorAll(
-            ".hiragana-card"
-        );
-
+    const cards = document.querySelectorAll(".hiragana-card");
 
     selectedCards.forEach(index => {
-
         if (cards[index]) {
-
-            cards[index].classList.add(
-                "selected"
-            );
+            cards[index].classList.add("selected");
         }
     });
 }
 
 
+/* =========================
+   BACK BUTTON
+   ========================= */
 
-// =========================
-// BACK BUTTON
-// =========================
-
-backButton.addEventListener(
-    "click",
-    () => {
-
-        quizScreen.classList.add("hidden");
-
-        selectionScreen.classList.remove("hidden");
+backButton.addEventListener("click", returnToSelection);
 
 
-        answerInput.classList.remove("hidden");
+/* =========================
+   KEEP BUTTON TAPS FROM
+   STEALING INPUT FOCUS
+   ========================= */
 
-        checkAnswerButton.classList.remove(
-            "hidden"
-        );
+// Prevent pointer interaction from moving focus away
+// from the answer field. The buttons still receive clicks
+// in supported browsers.
 
-
-        nextQuestionButton.textContent =
-            "Next Question →";
-
-
-        nextQuestionButton.classList.add(
-            "hidden"
-        );
-
-
-        nextQuestionButton.onclick =
-            null;
-
-
-        createChart();
-
-
-        restoreSelectedCards();
-
-
-        updateSelectedCount();
-    }
-);
-
-
-
-// =========================
-// ENTER KEY
-// =========================
-
-answerInput.addEventListener(
-    "keydown",
-    (event) => {
-
-        if (event.key !== "Enter") {
-
-            return;
-        }
-
-
-        if (!answerInput.disabled) {
-
-            checkAnswer();
-
-        } else if (
-            !nextQuestionButton.classList.contains(
-                "hidden"
-            )
+[checkAnswerButton, nextQuestionButton].forEach(button => {
+    button.addEventListener("pointerdown", event => {
+        if (
+            !answerInput.classList.contains("hidden") &&
+            !answerInput.disabled
         ) {
-
-            nextQuestionButton.click();
+            event.preventDefault();
         }
+    });
+});
+
+
+/* =========================
+   ENTER KEY
+   ========================= */
+
+answerInput.addEventListener("keydown", event => {
+    if (event.key !== "Enter") return;
+
+    event.preventDefault();
+
+    if (quizFinished) return;
+
+    if (!answered) {
+        checkAnswer();
+    } else {
+        nextQuestion();
     }
-);
+});
 
 
-
-// =========================
-// INITIALIZE
-// =========================
+/* =========================
+   INITIALIZE
+   ========================= */
 
 createChart();
-
 updateSelectedCount();
