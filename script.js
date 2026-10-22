@@ -275,9 +275,9 @@ startQuizButton.addEventListener("click", () => {
    SHOW QUESTION
    ========================= */
 
+
 function showQuestion() {
     const current = quizQuestions[currentQuestion];
-
     if (!current) return;
 
     hideFeedback();
@@ -294,12 +294,12 @@ function showQuestion() {
 
     answerInput.value = "";
     answerInput.disabled = false;
-
     checkAnswerButton.disabled = false;
 
-    // Do not blur or disable the input here.
-    // Keeping it focused helps the Android keyboard stay open.
+    // Restore focus after the question changes.
+    answerInput.focus({ preventScroll: true });
 }
+
 
 
 /* =========================
@@ -308,11 +308,11 @@ function showQuestion() {
 
 checkAnswerButton.addEventListener("click", checkAnswer);
 
+
 function checkAnswer() {
     if (answered) return;
 
     const current = quizQuestions[currentQuestion];
-
     if (!current) return;
 
     const userAnswer = answerInput.value.trim().toLowerCase();
@@ -330,34 +330,25 @@ function checkAnswer() {
     const isCorrect =
         userAnswer === correctAnswer.toLowerCase();
 
-    // Prevent duplicate scoring for the same question.
     answered = true;
 
     if (isCorrect) {
         trueTotal++;
-
-        showFeedback(
-            "Correct! ✓",
-            "correct"
-        );
+        showFeedback("Correct! ✓", "correct");
     } else {
         falseTotal++;
-
-        showFeedback(
-            `Wrong! The answer is ${correctAnswer}`,
-            "wrong"
-        );
+        showFeedback(`Wrong! The answer is ${correctAnswer}`, "wrong");
     }
 
     updateStats();
 
-    // Automatically show the next question after 3 seconds.
     clearFeedbackTimer();
 
     feedbackTimer = setTimeout(() => {
         nextQuestion();
     }, FEEDBACK_DURATION);
 }
+
 
 
 /* =========================
@@ -496,6 +487,11 @@ answerInput.addEventListener("keydown", event => {
     checkAnswer();
 });
 
+
+checkAnswerButton.addEventListener("pointerdown", event => {
+    // Prevent the button from taking focus away from the input.
+    event.preventDefault();
+})
 
 /* =========================
    INITIALIZE
