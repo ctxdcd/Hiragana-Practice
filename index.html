@@ -8,14 +8,88 @@
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#222222">
+    <meta name="theme-color" content="#000000">
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <!-- SPLASH INTRO: decide before first paint whether to show it -->
+    <script>
+        (function () {
+            try {
+                var root = document.documentElement;
+                if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+                var forced = /[?&]splash(=|&|$)/.test(location.search); // testing: index.html?splash
+                var installed = window.matchMedia("(display-mode: standalone)").matches ||
+                                window.navigator.standalone === true;
+                if (!installed && !forced) return;
+
+                // Once per app launch (a new launch starts a fresh session).
+                if (!forced && sessionStorage.getItem("splashShown")) return;
+                sessionStorage.setItem("splashShown", "1");
+
+                root.classList.add("splash-active");
+            } catch (e) { /* never block the app because of the intro */ }
+        })();
+    </script>
+
+    <style>
+        #splash {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            background: #000000;
+        }
+
+        html.splash-active #splash {
+            display: flex;
+            animation: splash-out 0.5s ease-in-out 1.4s forwards;
+        }
+
+        #splash img {
+            width: 112px;
+            height: 112px;
+            border-radius: 22%;
+            opacity: 0;
+            animation: splash-in 0.8s ease-out 0.1s forwards;
+        }
+
+        #splash p {
+            margin: 0;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            letter-spacing: 0.08em;
+            opacity: 0;
+            animation: splash-in 0.8s ease-out 0.35s forwards;
+        }
+
+        @keyframes splash-in {
+            from { opacity: 0; transform: scale(0.96); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes splash-out {
+            from { opacity: 1; }
+            to   { opacity: 0; visibility: hidden; }
+        }
+    </style>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
+    <!-- SPLASH INTRO (hidden unless launched as an installed app) -->
+    <div id="splash" aria-hidden="true">
+        <img src="icons/icon-512.png" alt="">
+        <p>Hiragana Practice</p>
+    </div>
 
     <!-- HIRAGANA SELECTION SCREEN -->
     <div id="selectionScreen" class="screen">
@@ -122,6 +196,30 @@
                 });
             });
         }
+    </script>
+
+    <!-- Remove the splash once it has faded out -->
+    <script>
+        (function () {
+            var splash = document.getElementById("splash");
+            if (!splash) return;
+
+            var root = document.documentElement;
+            if (!root.classList.contains("splash-active")) {
+                splash.remove();
+                return;
+            }
+
+            function finish() {
+                root.classList.remove("splash-active");
+                splash.remove();
+            }
+
+            splash.addEventListener("animationend", function (event) {
+                if (event.target === splash) finish();
+            });
+            setTimeout(finish, 2500); // safety net
+        })();
     </script>
 
 </body>
