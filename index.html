@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +20,19 @@
             <p class="subtitle">
                 Select the hiragana you want to practice.
             </p>
+
+            <!-- CATEGORY FILTERS -->
+            <div class="category-filters" role="group" aria-label="Hiragana category">
+                <button type="button" class="filter-button active" data-category="basic" aria-pressed="true">
+                    Basic Hiragana
+                </button>
+                <button type="button" class="filter-button" data-category="dakuten" aria-pressed="false">
+                    Dakuten
+                </button>
+                <button type="button" class="filter-button" data-category="handakuten" aria-pressed="false">
+                    Handakuten
+                </button>
+            </div>
 
             <div class="selection-controls">
                 <button id="selectAll" type="button">Select All</button>
