@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Hiragana Quiz</title>
+    <title>Japanese Practice</title>
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -88,21 +88,56 @@
     <!-- SPLASH INTRO (hidden unless launched as an installed app) -->
     <div id="splash" aria-hidden="true">
         <img src="icons/icon-512.png" alt="">
-        <p>Hiragana Practice</p>
+        <p>Japanese Practice</p>
     </div>
 
-    <!-- HIRAGANA SELECTION SCREEN -->
-    <div id="selectionScreen" class="screen">
-        <main class="selection-container">
+    <!-- HOMEPAGE -->
+    <div id="homeScreen" class="screen">
+        <main class="home-container">
 
-            <h1>Hiragana Quiz</h1>
+            <h1>Japanese Practice</h1>
 
             <p class="subtitle">
+                A simple space to learn, recognize, and practice Japanese characters.
+            </p>
+
+            <div class="home-cards">
+                <button type="button" class="module-card" data-module="hiragana">
+                    <span class="module-kana" aria-hidden="true">あ</span>
+                    <span class="module-name">Hiragana</span>
+                    <span class="module-desc">Native Japanese words and grammar.</span>
+                </button>
+
+                <button type="button" class="module-card" data-module="katakana">
+                    <span class="module-kana" aria-hidden="true">ア</span>
+                    <span class="module-name">Katakana</span>
+                    <span class="module-desc">Foreign words, names and emphasis.</span>
+                </button>
+            </div>
+
+            <button id="aboutButton" class="about-button" type="button">About</button>
+
+        </main>
+    </div>
+
+
+    <!-- SELECTION SCREEN (shared by Hiragana and Katakana; the labels are set by script.js) -->
+    <div id="selectionScreen" class="screen hidden">
+        <main class="selection-container">
+
+            <button id="homeButton" class="back-button home-button" type="button">
+                <span class="back-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"></polyline></svg></span>
+Home
+            </button>
+
+            <h1 id="moduleTitle">Hiragana Quiz</h1>
+
+            <p id="moduleSubtitle" class="subtitle">
                 Select the hiragana you want to practice.
             </p>
 
             <!-- CATEGORY FILTERS -->
-            <div class="category-filters" role="group" aria-label="Hiragana category">
+            <div class="category-filters" role="group" aria-label="Character category">
                 <button type="button" class="filter-button active" data-category="basic" aria-pressed="true">
                     Basic Hiragana
                 </button>
@@ -122,7 +157,7 @@
 
             <p id="selectedCount">0 selected</p>
 
-            <div id="hiraganaChart"></div>
+            <div id="kanaChart"></div>
 
             <div class="start-container">
 
@@ -162,15 +197,22 @@
         <main class="quiz-container">
 
             <button id="backButton" class="back-button" type="button">
-                ← Back to Selection
+                <span class="back-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"></polyline></svg></span>
+Back to Selection
             </button>
 
             <div class="quiz-header">
                 <span id="questionNumber">Practice #1</span>
 
                 <div class="answer-stats">
-                    <span class="true-stat">T: <span id="trueCount">0</span></span>
-                    <span class="false-stat">F: <span id="falseCount">0</span></span>
+                    <span class="true-stat" role="group" aria-label="Correct answers">
+    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7"></polyline></svg></span>
+    <span id="trueCount">0</span>
+</span>
+<span class="false-stat" role="group" aria-label="Wrong answers">
+    <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg></span>
+    <span id="falseCount">0</span>
+</span>
                 </div>
             </div>
 
@@ -201,6 +243,35 @@
             <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
 
         </main>
+    </div>
+
+    <!-- ABOUT (opened from the homepage) -->
+    <div id="aboutModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+        <div class="modal-box">
+            <h2 id="aboutTitle">About Japanese Practice</h2>
+
+            <p>
+                A simple space to learn, recognize, and practice Japanese characters.
+                Choose Hiragana or Katakana, pick the characters you want, and practice
+                for as long as you like.
+            </p>
+            <p>
+                <strong>Writing Quiz:</strong> see a character and type its romaji, or see
+                the romaji and type the character.<br>
+                <strong>Recognition Practice:</strong> see the romaji and pick the right
+                character from four choices.
+            </p>
+            <p>
+                <strong>Show Yōon</strong> adds the combined sounds, like <span class="nowrap">きゃ</span> and <span class="nowrap">キャ</span>.
+                Hiragana and Katakana keep their own selections and settings while the
+                app is open.
+            </p>
+            <p>
+                Once installed, the app works offline.
+            </p>
+
+            <button id="aboutClose" class="start-button" type="button">Close</button>
+        </div>
     </div>
 
     <script src="script.js"></script>

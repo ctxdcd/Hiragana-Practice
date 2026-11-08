@@ -1,6 +1,6 @@
-/* Hiragana Practice - service worker
+/* Japanese Practice - service worker
    Bump CACHE_VERSION whenever you change any cached file so users get the update. */
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 const CACHE_NAME = "hiragana-practice-" + CACHE_VERSION;
 
 const PRECACHE_URLS = [

@@ -1,12 +1,14 @@
 /* =========================
    DATA
-   Three separate datasets, plus a Yōon dataset for each of them.
-   Every character's `id` is the hiragana character (or Yōon combination)
-   itself, which is unique across all sets (checked at startup below).
-   Selection is tracked by id, never by array index, so switching filters
-   can't shift anything.
+   Hiragana and Katakana each have their own datasets: three base sets plus
+   a Yōon set for each of them. Every character's `id` is the character (or
+   Yōon combination) itself; ids are unique within a module (checked at
+   startup in createModule). Selection is tracked by id, never by array
+   index, so switching filters can't shift anything.
    `alt` lists extra romaji spellings accepted in Japanese → Romaji mode.
    ========================= */
+
+/* ----- HIRAGANA ----- */
 
 const BASIC_HIRAGANA = [
     { id: "あ", char: "あ", romaji: "a" },
@@ -158,60 +160,279 @@ const HANDAKUTEN_YOON = [
     { id: "ぴょ", char: "ぴょ", romaji: "pyo" }
 ];
 
-const CATEGORIES = {
+
+/* =========================
+   KATAKANA
+   Its own datasets: the same structure as Hiragana, with the katakana
+   characters and their readings. ヂ/ヅ share a reading with ジ/ズ, exactly
+   like ぢ/づ do in Hiragana. Yōon uses the small ャ / ュ / ョ, and ヂャ / ヂュ / ヂョ
+   are intentionally left out. (ヴ is not part of the standard 46 + 20 + 5.)
+   ========================= */
+
+const BASIC_KATAKANA = [
+    { id: "ア", char: "ア", romaji: "a" },
+    { id: "イ", char: "イ", romaji: "i" },
+    { id: "ウ", char: "ウ", romaji: "u" },
+    { id: "エ", char: "エ", romaji: "e" },
+    { id: "オ", char: "オ", romaji: "o" },
+
+    { id: "カ", char: "カ", romaji: "ka" },
+    { id: "キ", char: "キ", romaji: "ki" },
+    { id: "ク", char: "ク", romaji: "ku" },
+    { id: "ケ", char: "ケ", romaji: "ke" },
+    { id: "コ", char: "コ", romaji: "ko" },
+
+    { id: "サ", char: "サ", romaji: "sa" },
+    { id: "シ", char: "シ", romaji: "shi", alt: ["si"] },
+    { id: "ス", char: "ス", romaji: "su" },
+    { id: "セ", char: "セ", romaji: "se" },
+    { id: "ソ", char: "ソ", romaji: "so" },
+
+    { id: "タ", char: "タ", romaji: "ta" },
+    { id: "チ", char: "チ", romaji: "chi", alt: ["ti"] },
+    { id: "ツ", char: "ツ", romaji: "tsu", alt: ["tu"] },
+    { id: "テ", char: "テ", romaji: "te" },
+    { id: "ト", char: "ト", romaji: "to" },
+
+    { id: "ナ", char: "ナ", romaji: "na" },
+    { id: "ニ", char: "ニ", romaji: "ni" },
+    { id: "ヌ", char: "ヌ", romaji: "nu" },
+    { id: "ネ", char: "ネ", romaji: "ne" },
+    { id: "ノ", char: "ノ", romaji: "no" },
+
+    { id: "ハ", char: "ハ", romaji: "ha" },
+    { id: "ヒ", char: "ヒ", romaji: "hi" },
+    { id: "フ", char: "フ", romaji: "fu", alt: ["hu"] },
+    { id: "ヘ", char: "ヘ", romaji: "he" },
+    { id: "ホ", char: "ホ", romaji: "ho" },
+
+    { id: "マ", char: "マ", romaji: "ma" },
+    { id: "ミ", char: "ミ", romaji: "mi" },
+    { id: "ム", char: "ム", romaji: "mu" },
+    { id: "メ", char: "メ", romaji: "me" },
+    { id: "モ", char: "モ", romaji: "mo" },
+
+    { id: "ヤ", char: "ヤ", romaji: "ya" },
+    { id: "ユ", char: "ユ", romaji: "yu" },
+    { id: "ヨ", char: "ヨ", romaji: "yo" },
+
+    { id: "ラ", char: "ラ", romaji: "ra" },
+    { id: "リ", char: "リ", romaji: "ri" },
+    { id: "ル", char: "ル", romaji: "ru" },
+    { id: "レ", char: "レ", romaji: "re" },
+    { id: "ロ", char: "ロ", romaji: "ro" },
+
+    { id: "ワ", char: "ワ", romaji: "wa" },
+    { id: "ヲ", char: "ヲ", romaji: "wo", alt: ["o"] },
+    { id: "ン", char: "ン", romaji: "n" }
+];
+
+const DAKUTEN_KATAKANA = [
+    { id: "ガ", char: "ガ", romaji: "ga" },
+    { id: "ギ", char: "ギ", romaji: "gi" },
+    { id: "グ", char: "グ", romaji: "gu" },
+    { id: "ゲ", char: "ゲ", romaji: "ge" },
+    { id: "ゴ", char: "ゴ", romaji: "go" },
+
+    { id: "ザ", char: "ザ", romaji: "za" },
+    { id: "ジ", char: "ジ", romaji: "ji", alt: ["zi"] },
+    { id: "ズ", char: "ズ", romaji: "zu" },
+    { id: "ゼ", char: "ゼ", romaji: "ze" },
+    { id: "ゾ", char: "ゾ", romaji: "zo" },
+
+    { id: "ダ", char: "ダ", romaji: "da" },
+    { id: "ヂ", char: "ヂ", romaji: "ji", alt: ["di"] },
+    { id: "ヅ", char: "ヅ", romaji: "zu", alt: ["du"] },
+    { id: "デ", char: "デ", romaji: "de" },
+    { id: "ド", char: "ド", romaji: "do" },
+
+    { id: "バ", char: "バ", romaji: "ba" },
+    { id: "ビ", char: "ビ", romaji: "bi" },
+    { id: "ブ", char: "ブ", romaji: "bu" },
+    { id: "ベ", char: "ベ", romaji: "be" },
+    { id: "ボ", char: "ボ", romaji: "bo" }
+];
+
+const HANDAKUTEN_KATAKANA = [
+    { id: "パ", char: "パ", romaji: "pa" },
+    { id: "ピ", char: "ピ", romaji: "pi" },
+    { id: "プ", char: "プ", romaji: "pu" },
+    { id: "ペ", char: "ペ", romaji: "pe" },
+    { id: "ポ", char: "ポ", romaji: "po" }
+];
+
+const BASIC_KATAKANA_YOON = [
+    { id: "キャ", char: "キャ", romaji: "kya" },
+    { id: "キュ", char: "キュ", romaji: "kyu" },
+    { id: "キョ", char: "キョ", romaji: "kyo" },
+
+    { id: "シャ", char: "シャ", romaji: "sha", alt: ["sya"] },
+    { id: "シュ", char: "シュ", romaji: "shu", alt: ["syu"] },
+    { id: "ショ", char: "ショ", romaji: "sho", alt: ["syo"] },
+
+    { id: "チャ", char: "チャ", romaji: "cha", alt: ["tya"] },
+    { id: "チュ", char: "チュ", romaji: "chu", alt: ["tyu"] },
+    { id: "チョ", char: "チョ", romaji: "cho", alt: ["tyo"] },
+
+    { id: "ニャ", char: "ニャ", romaji: "nya" },
+    { id: "ニュ", char: "ニュ", romaji: "nyu" },
+    { id: "ニョ", char: "ニョ", romaji: "nyo" },
+
+    { id: "ヒャ", char: "ヒャ", romaji: "hya" },
+    { id: "ヒュ", char: "ヒュ", romaji: "hyu" },
+    { id: "ヒョ", char: "ヒョ", romaji: "hyo" },
+
+    { id: "ミャ", char: "ミャ", romaji: "mya" },
+    { id: "ミュ", char: "ミュ", romaji: "myu" },
+    { id: "ミョ", char: "ミョ", romaji: "myo" },
+
+    { id: "リャ", char: "リャ", romaji: "rya" },
+    { id: "リュ", char: "リュ", romaji: "ryu" },
+    { id: "リョ", char: "リョ", romaji: "ryo" }
+];
+
+const DAKUTEN_KATAKANA_YOON = [
+    { id: "ギャ", char: "ギャ", romaji: "gya" },
+    { id: "ギュ", char: "ギュ", romaji: "gyu" },
+    { id: "ギョ", char: "ギョ", romaji: "gyo" },
+
+    { id: "ジャ", char: "ジャ", romaji: "ja", alt: ["jya", "zya"] },
+    { id: "ジュ", char: "ジュ", romaji: "ju", alt: ["jyu", "zyu"] },
+    { id: "ジョ", char: "ジョ", romaji: "jo", alt: ["jyo", "zyo"] },
+
+    { id: "ビャ", char: "ビャ", romaji: "bya" },
+    { id: "ビュ", char: "ビュ", romaji: "byu" },
+    { id: "ビョ", char: "ビョ", romaji: "byo" }
+];
+
+const HANDAKUTEN_KATAKANA_YOON = [
+    { id: "ピャ", char: "ピャ", romaji: "pya" },
+    { id: "ピュ", char: "ピュ", romaji: "pyu" },
+    { id: "ピョ", char: "ピョ", romaji: "pyo" }
+];
+
+
+/* =========================
+   CATEGORIES
+   Each module groups its data the same way: three categories, and the
+   Yōon set that belongs to each category.
+   ========================= */
+
+const HIRAGANA_CATEGORIES = {
     basic: BASIC_HIRAGANA,
     dakuten: DAKUTEN_HIRAGANA,
     handakuten: HANDAKUTEN_HIRAGANA
 };
 
-// The Yōon set that belongs to each category.
-const YOON_CATEGORIES = {
+const HIRAGANA_YOON_CATEGORIES = {
     basic: BASIC_YOON,
     dakuten: DAKUTEN_YOON,
     handakuten: HANDAKUTEN_YOON
 };
 
-// Flat list + lookup by id, built once. Yōon items are included so that
-// selected Yōon cards flow into the quiz pool and answer checking.
-const ALL_HIRAGANA = [
-    ...BASIC_HIRAGANA,
-    ...DAKUTEN_HIRAGANA,
-    ...HANDAKUTEN_HIRAGANA,
-    ...BASIC_YOON,
-    ...DAKUTEN_YOON,
-    ...HANDAKUTEN_YOON
-];
+const KATAKANA_CATEGORIES = {
+    basic: BASIC_KATAKANA,
+    dakuten: DAKUTEN_KATAKANA,
+    handakuten: HANDAKUTEN_KATAKANA
+};
 
-const HIRAGANA_BY_ID = new Map();
-ALL_HIRAGANA.forEach(item => {
-    if (HIRAGANA_BY_ID.has(item.id)) {
-        console.warn("Duplicate hiragana id:", item.id);
-    }
-    HIRAGANA_BY_ID.set(item.id, item);
-});
+const KATAKANA_YOON_CATEGORIES = {
+    basic: BASIC_KATAKANA_YOON,
+    dakuten: DAKUTEN_KATAKANA_YOON,
+    handakuten: HANDAKUTEN_KATAKANA_YOON
+};
 
 
 /* =========================
-   STATE
+   MODULES
+   One object per learning module. Everything that belongs to a module (its
+   datasets, selection, settings and practice state) lives on that object,
+   so Hiragana and Katakana can never overwrite each other. The screens and
+   the quiz engine below are shared: they always read and write the ACTIVE
+   module (see activeModule).
    ========================= */
 
-// Set of character ids selected across ALL categories and views.
-const selectedCards = new Set();
+function createModule(config) {
+    const categories = config.categories;
+    const yoonCategories = config.yoonCategories;
 
-let currentCategory = "basic";
+    // Flat list + lookup by id, built once. Yōon items are included so that
+    // selected Yōon cards flow into the quiz pool and answer checking.
+    const all = [
+        ...categories.basic,
+        ...categories.dakuten,
+        ...categories.handakuten,
+        ...yoonCategories.basic,
+        ...yoonCategories.dakuten,
+        ...yoonCategories.handakuten
+    ];
 
-// One flag shared by all categories, so it survives category switching.
-let showYoon = false;
+    const byId = new Map();
+    all.forEach(item => {
+        if (byId.has(item.id)) {
+            console.warn("Duplicate " + config.name + " id:", item.id);
+        }
+        byId.set(item.id, item);
+    });
 
-let quizPool = [];
-let practiceMode = "writing";   // "writing" (typing) or "recognition" (4 cards)
-let quizMode = "jp-romaji";   // direction of the Writing Quiz only
-let currentItem = null;
-let previousId = null;
-let practiceNumber = 1;
-let trueCount = 0;
-let falseCount = 0;
-let answerLocked = false;
+    return {
+        // ----- fixed data -----
+        id: config.id,
+        name: config.name,
+        categories,
+        yoonCategories,
+        all,
+        byId,
+
+        // ----- selection screen state -----
+        // Set of character ids selected across ALL categories and views.
+        selectedCards: new Set(),
+        currentCategory: "basic",
+        // One flag shared by all of the module's categories, so it survives
+        // category switching.
+        showYoon: false,
+        practiceModeChoice: "writing",   // value of the Practice Mode select
+        quizModeChoice: "jp-romaji",     // value of the Quiz Mode select
+
+        // ----- practice state -----
+        quizPool: [],
+        practiceMode: "writing",   // "writing" (typing) or "recognition" (4 cards)
+        quizMode: "jp-romaji",     // direction of the Writing Quiz only
+        currentItem: null,
+        previousId: null,
+        practiceNumber: 1,
+        trueCount: 0,
+        falseCount: 0,
+        answerLocked: false,
+        lastCorrectIndex: -1,      // Recognition: slot of the correct card last time
+        correctStreak: 0           // ...and how many questions in a row it sat there
+    };
+}
+
+const MODULES = {
+    hiragana: createModule({
+        id: "hiragana",
+        name: "Hiragana",
+        categories: HIRAGANA_CATEGORIES,
+        yoonCategories: HIRAGANA_YOON_CATEGORIES
+    }),
+    katakana: createModule({
+        id: "katakana",
+        name: "Katakana",
+        categories: KATAKANA_CATEGORIES,
+        yoonCategories: KATAKANA_YOON_CATEGORIES
+    })
+};
+
+
+/* =========================
+   SHARED RUNTIME
+   Only one module is on screen at a time, so the timers are shared. Leaving
+   a module always stops its quiz first (see stopQuiz).
+   ========================= */
+
+let activeModule = null;   // null while the homepage is showing
+
 let nextQuestionTimer = null;
 let feedbackTimer = null;
 
@@ -219,19 +440,27 @@ const FEEDBACK_DELAY = 1100;
 
 // Recognition Practice
 const CHOICE_COUNT = 4;
-let lastCorrectIndex = -1;   // where the correct card was on the last question
-let correctStreak = 0;       // how many questions in a row it sat there
-const MAX_SAME_POSITION = 2; // never more than this many in a row
+const MAX_SAME_POSITION = 2; // the correct card never sits in one slot more than this many questions in a row
 
 
 /* =========================
    ELEMENTS
    ========================= */
 
+const homeScreen = document.getElementById("homeScreen");
+const moduleCards = document.querySelectorAll(".module-card");
+const aboutButton = document.getElementById("aboutButton");
+const aboutModal = document.getElementById("aboutModal");
+const aboutClose = document.getElementById("aboutClose");
+
 const selectionScreen = document.getElementById("selectionScreen");
 const quizScreen = document.getElementById("quizScreen");
 
-const hiraganaChart = document.getElementById("hiraganaChart");
+const homeButton = document.getElementById("homeButton");
+const moduleTitleEl = document.getElementById("moduleTitle");
+const moduleSubtitleEl = document.getElementById("moduleSubtitle");
+
+const kanaChart = document.getElementById("kanaChart");
 const selectedCountEl = document.getElementById("selectedCount");
 const filterButtons = document.querySelectorAll(".filter-button");
 const selectAllBtn = document.getElementById("selectAll");
@@ -263,25 +492,28 @@ const feedbackEl = document.getElementById("feedback");
 // The cards currently on screen: the active category's Yōon set when
 // Yōon is shown, otherwise its original characters.
 function getVisibleItems() {
-    const source = showYoon ? YOON_CATEGORIES : CATEGORIES;
-    return source[currentCategory];
+    const m = activeModule;
+    const source = m.showYoon ? m.yoonCategories : m.categories;
+    return source[m.currentCategory];
 }
 
 function renderChart() {
-    hiraganaChart.innerHTML = "";
-    hiraganaChart.classList.toggle("yoon-view", showYoon);
+    const m = activeModule;
+
+    kanaChart.innerHTML = "";
+    kanaChart.classList.toggle("yoon-view", m.showYoon);
 
     getVisibleItems().forEach(item => {
         const card = document.createElement("div");
-        card.className = "hiragana-card";
+        card.className = "kana-card";
         card.dataset.id = item.id;
         card.setAttribute("role", "button");
         card.setAttribute("tabindex", "0");
 
-        if (selectedCards.has(item.id)) {
+        if (m.selectedCards.has(item.id)) {
             card.classList.add("selected");
         }
-        card.setAttribute("aria-pressed", selectedCards.has(item.id));
+        card.setAttribute("aria-pressed", m.selectedCards.has(item.id));
 
         const japanese = document.createElement("span");
         japanese.className = "japanese";
@@ -293,22 +525,24 @@ function renderChart() {
 
         card.appendChild(japanese);
         card.appendChild(romaji);
-        hiraganaChart.appendChild(card);
+        kanaChart.appendChild(card);
     });
 }
 
 function updateSelectedCount() {
     // Total across ALL categories and views, not only the visible cards.
-    selectedCountEl.textContent = selectedCards.size + " selected";
+    selectedCountEl.textContent = activeModule.selectedCards.size + " selected";
     hideStartMessage();
 }
 
 function updateYoonButton() {
+    const showYoon = activeModule.showYoon;
     toggleYoonBtn.textContent = showYoon ? "Hide Yōon" : "Show Yōon";
     toggleYoonBtn.setAttribute("aria-pressed", showYoon);
 }
 
 function toggleCard(card) {
+    const selectedCards = activeModule.selectedCards;
     const id = card.dataset.id;
 
     if (selectedCards.has(id)) {
@@ -325,9 +559,10 @@ function toggleCard(card) {
 }
 
 function setCategory(category) {
-    if (!CATEGORIES[category]) return;
+    const m = activeModule;
+    if (!m.categories[category]) return;
 
-    currentCategory = category;
+    m.currentCategory = category;
 
     filterButtons.forEach(button => {
         const isActive = button.dataset.category === category;
@@ -339,14 +574,14 @@ function setCategory(category) {
     renderChart();
 }
 
-hiraganaChart.addEventListener("click", event => {
-    const card = event.target.closest(".hiragana-card");
+kanaChart.addEventListener("click", event => {
+    const card = event.target.closest(".kana-card");
     if (card) toggleCard(card);
 });
 
-hiraganaChart.addEventListener("keydown", event => {
+kanaChart.addEventListener("keydown", event => {
     if (event.key !== "Enter" && event.key !== " ") return;
-    const card = event.target.closest(".hiragana-card");
+    const card = event.target.closest(".kana-card");
     if (!card) return;
     event.preventDefault();
     toggleCard(card);
@@ -358,21 +593,21 @@ filterButtons.forEach(button => {
 
 // Show / Hide Yōon: swaps the chart for the active category.
 toggleYoonBtn.addEventListener("click", () => {
-    showYoon = !showYoon;
+    activeModule.showYoon = !activeModule.showYoon;
     updateYoonButton();
     renderChart();
 });
 
 // Select All: only the cards currently displayed.
 selectAllBtn.addEventListener("click", () => {
-    getVisibleItems().forEach(item => selectedCards.add(item.id));
+    getVisibleItems().forEach(item => activeModule.selectedCards.add(item.id));
     renderChart();
     updateSelectedCount();
 });
 
 // Clear All: only the cards currently displayed.
 clearAllBtn.addEventListener("click", () => {
-    getVisibleItems().forEach(item => selectedCards.delete(item.id));
+    getVisibleItems().forEach(item => activeModule.selectedCards.delete(item.id));
     renderChart();
     updateSelectedCount();
 });
@@ -383,6 +618,7 @@ clearAllBtn.addEventListener("click", () => {
    ========================= */
 
 function showScreen(screen) {
+    homeScreen.classList.toggle("hidden", screen !== "home");
     selectionScreen.classList.toggle("hidden", screen !== "selection");
     quizScreen.classList.toggle("hidden", screen !== "quiz");
 }
@@ -400,42 +636,48 @@ function showFeedback(message, isCorrect) {
 }
 
 function updateStats() {
-    trueCountEl.textContent = trueCount;
-    falseCountEl.textContent = falseCount;
-    questionNumberEl.textContent = "Practice #" + practiceNumber;
+    const m = activeModule;
+    trueCountEl.textContent = m.trueCount;
+    falseCountEl.textContent = m.falseCount;
+    questionNumberEl.textContent = "Practice #" + m.practiceNumber;
 }
 
 function pickNextItem() {
+    const m = activeModule;
     let next;
 
-    if (quizPool.length === 1) {
-        next = quizPool[0];
+    if (m.quizPool.length === 1) {
+        next = m.quizPool[0];
     } else {
         // Avoid showing the same character twice in a row.
         do {
-            next = quizPool[Math.floor(Math.random() * quizPool.length)];
-        } while (next.id === previousId);
+            next = m.quizPool[Math.floor(Math.random() * m.quizPool.length)];
+        } while (next.id === m.previousId);
     }
 
     return next;
 }
 
 function showQuestion() {
-    currentItem = pickNextItem();
-    previousId = currentItem.id;
+    const m = activeModule;
 
-    if (practiceMode === "recognition") {
+    m.currentItem = pickNextItem();
+    m.previousId = m.currentItem.id;
+
+    if (m.practiceMode === "recognition") {
         showRecognitionQuestion();
         return;
     }
 
     questionEl.textContent =
-        quizMode === "jp-romaji" ? currentItem.char : currentItem.romaji;
+        m.quizMode === "jp-romaji" ? m.currentItem.char : m.currentItem.romaji;
 
     answerInput.value = "";
     answerInput.placeholder =
-        quizMode === "jp-romaji" ? "Type the romaji..." : "Type the hiragana...";
-    answerLocked = false;
+        m.quizMode === "jp-romaji"
+            ? "Type the romaji..."
+            : "Type the " + m.name.toLowerCase() + "...";
+    m.answerLocked = false;
     answerInput.disabled = false;
     checkAnswerBtn.disabled = false;
     updateStats();
@@ -443,26 +685,30 @@ function showQuestion() {
 }
 
 function isCorrectAnswer(rawAnswer) {
+    const m = activeModule;
+
     // NFC keeps composed and decomposed forms of the same kana equal.
     const answer = rawAnswer.trim().normalize("NFC");
 
-    if (quizMode === "jp-romaji") {
+    if (m.quizMode === "jp-romaji") {
         const normalized = answer.toLowerCase();
-        const accepted = [currentItem.romaji, ...(currentItem.alt || [])];
+        const accepted = [m.currentItem.romaji, ...(m.currentItem.alt || [])];
         return accepted.includes(normalized);
     }
 
     // Romaji → Japanese: several characters share a reading (じ/ぢ, ず/づ),
-    // so accept any hiragana that has the same romaji as the question.
-    // A Yōon answer must be the full combination (e.g. きゃ), written with
-    // the small ゃ/ゅ/ょ; a single character or a large や/ゆ/よ is wrong.
-    return ALL_HIRAGANA.some(
-        item => item.romaji === currentItem.romaji && item.char === answer
+    // so accept any character of THIS module that has the same romaji as the
+    // question (a hiragana answer is never accepted in Katakana, and vice versa).
+    // A Yōon answer must be the full combination (e.g. きゃ / キャ), written with
+    // the small ゃ/ゅ/ょ (ャ/ュ/ョ); a single character or a large や/ゆ/よ is wrong.
+    return m.all.some(
+        item => item.romaji === m.currentItem.romaji && item.char === answer
     );
 }
 
 function checkAnswer() {
-    if (answerLocked || !currentItem) return;
+    const m = activeModule;
+    if (m.answerLocked || !m.currentItem) return;
 
     const rawAnswer = answerInput.value;
     if (rawAnswer.trim() === "") {
@@ -470,20 +716,22 @@ function checkAnswer() {
         return;
     }
 
-    answerLocked = true;
+    m.answerLocked = true;
 
     const correctText =
-        quizMode === "jp-romaji" ? currentItem.romaji : currentItem.char;
+        m.quizMode === "jp-romaji" ? m.currentItem.romaji : m.currentItem.char;
     resolveAnswer(isCorrectAnswer(rawAnswer), correctText);
 }
 
 // Shared by both modes: counters, feedback, and the automatic next question.
 function resolveAnswer(isCorrect, correctText) {
+    const m = activeModule;
+
     if (isCorrect) {
-        trueCount++;
+        m.trueCount++;
         showFeedback("Correct!", true);
     } else {
-        falseCount++;
+        m.falseCount++;
         showFeedback("Wrong! Answer: " + correctText, false);
     }
 
@@ -491,8 +739,9 @@ function resolveAnswer(isCorrect, correctText) {
 
     clearTimeout(nextQuestionTimer);
     nextQuestionTimer = setTimeout(() => {
+        if (activeModule !== m) return;
         hideFeedback();
-        practiceNumber++;
+        m.practiceNumber++;
         showQuestion();
     }, FEEDBACK_DELAY);
 }
@@ -500,7 +749,7 @@ function resolveAnswer(isCorrect, correctText) {
 
 /* =========================
    RECOGNITION PRACTICE
-   Romaji prompt, four hiragana cards. Uses the same quizPool, counters,
+   Romaji prompt, four character cards. Uses the same quizPool, counters,
    feedback and timing as the Writing Quiz.
    ========================= */
 
@@ -514,16 +763,19 @@ function shuffle(list) {
 }
 
 // Recognition needs 4 different READINGS in the pool, not just 4 characters:
-// じ/ぢ and ず/づ share a reading, so showing both would give two right answers.
+// じ/ぢ and ず/づ (ジ/ヂ and ズ/ヅ) share a reading, so showing both would
+// give two right answers.
 function countReadings(items) {
     return new Set(items.map(item => item.romaji)).size;
 }
 
 function buildChoices(correct) {
+    const m = activeModule;
+
     // Group the other pool items by reading (the correct reading is excluded,
     // so no distractor can also be a correct answer).
     const groups = new Map();
-    quizPool.forEach(item => {
+    m.quizPool.forEach(item => {
         if (item.romaji === correct.romaji) return;
         if (!groups.has(item.romaji)) groups.set(item.romaji, []);
         groups.get(item.romaji).push(item);
@@ -542,7 +794,7 @@ function buildChoices(correct) {
     // The shuffle is already uniform; this only stops a long run of the
     // correct card landing in the same slot.
     let index = choices.indexOf(correct);
-    if (index === lastCorrectIndex && correctStreak >= MAX_SAME_POSITION) {
+    if (index === m.lastCorrectIndex && m.correctStreak >= MAX_SAME_POSITION) {
         let other;
         do {
             other = Math.floor(Math.random() * choices.length);
@@ -550,22 +802,24 @@ function buildChoices(correct) {
         [choices[index], choices[other]] = [choices[other], choices[index]];
         index = other;
     }
-    correctStreak = index === lastCorrectIndex ? correctStreak + 1 : 1;
-    lastCorrectIndex = index;
+    m.correctStreak = index === m.lastCorrectIndex ? m.correctStreak + 1 : 1;
+    m.lastCorrectIndex = index;
 
     return choices;
 }
 
 function showRecognitionQuestion() {
-    questionEl.textContent = currentItem.romaji;
+    const m = activeModule;
+
+    questionEl.textContent = m.currentItem.romaji;
 
     choiceArea.innerHTML = "";
     choiceArea.classList.remove("locked");
     choiceArea.setAttribute(
-        "aria-label", "Choose the hiragana for " + currentItem.romaji
+        "aria-label", "Choose the " + m.name.toLowerCase() + " for " + m.currentItem.romaji
     );
 
-    buildChoices(currentItem).forEach(item => {
+    buildChoices(m.currentItem).forEach(item => {
         const card = document.createElement("button");
         card.type = "button";
         card.className = "choice-card";
@@ -574,25 +828,27 @@ function showRecognitionQuestion() {
         choiceArea.appendChild(card);
     });
 
-    answerLocked = false;
+    m.answerLocked = false;
     updateStats();
 }
 
 function chooseAnswer(card) {
-    // One answer per question.
-    if (answerLocked || !currentItem || practiceMode !== "recognition") return;
-    answerLocked = true;
+    const m = activeModule;
 
-    const isCorrect = card.dataset.id === currentItem.id;
+    // One answer per question.
+    if (m.answerLocked || !m.currentItem || m.practiceMode !== "recognition") return;
+    m.answerLocked = true;
+
+    const isCorrect = card.dataset.id === m.currentItem.id;
 
     choiceArea.classList.add("locked");
     card.classList.add("selected");
     Array.from(choiceArea.children).forEach(other => {
-        if (other.dataset.id === currentItem.id) other.classList.add("correct");
+        if (other.dataset.id === m.currentItem.id) other.classList.add("correct");
     });
     if (!isCorrect) card.classList.add("wrong");
 
-    resolveAnswer(isCorrect, currentItem.char);
+    resolveAnswer(isCorrect, m.currentItem.char);
 }
 
 choiceArea.addEventListener("click", event => {
@@ -623,25 +879,35 @@ function updatePracticeModeUI() {
     hideStartMessage();
 }
 
-practiceModeSelect.addEventListener("change", updatePracticeModeUI);
+practiceModeSelect.addEventListener("change", () => {
+    activeModule.practiceModeChoice = practiceModeSelect.value;
+    updatePracticeModeUI();
+});
+
+quizModeSelect.addEventListener("change", () => {
+    activeModule.quizModeChoice = quizModeSelect.value;
+});
 
 function startQuiz() {
+    const m = activeModule;
+
     // Build the pool from every selected id, whatever category or view
     // (normal or Yōon) it came from.
-    quizPool = [];
-    selectedCards.forEach(id => {
-        const item = HIRAGANA_BY_ID.get(id);
-        if (item) quizPool.push(item);
+    m.quizPool = [];
+    m.selectedCards.forEach(id => {
+        const item = m.byId.get(id);
+        if (item) m.quizPool.push(item);
     });
 
     const recognition = practiceModeSelect.value === "recognition";
 
-    if (quizPool.length === 0 && !recognition) {
-        selectedCountEl.textContent = "Select at least one hiragana to start";
+    if (m.quizPool.length === 0 && !recognition) {
+        selectedCountEl.textContent =
+            "Select at least one " + m.name.toLowerCase() + " to start";
         return;
     }
 
-    if (recognition && countReadings(quizPool) < CHOICE_COUNT) {
+    if (recognition && countReadings(m.quizPool) < CHOICE_COUNT) {
         showStartMessage(
             "Select at least " + CHOICE_COUNT + " characters with different " +
             "readings to start Recognition Practice."
@@ -650,32 +916,40 @@ function startQuiz() {
     }
 
     hideStartMessage();
-    practiceMode = recognition ? "recognition" : "writing";
+    m.practiceMode = recognition ? "recognition" : "writing";
     answerArea.classList.toggle("hidden", recognition);
     choiceArea.classList.toggle("hidden", !recognition);
 
-    quizMode = quizModeSelect.value;
-    lastCorrectIndex = -1;
-    correctStreak = 0;
-    practiceNumber = 1;
-    trueCount = 0;
-    falseCount = 0;
-    previousId = null;
+    m.quizMode = quizModeSelect.value;
+    m.lastCorrectIndex = -1;
+    m.correctStreak = 0;
+    m.practiceNumber = 1;
+    m.trueCount = 0;
+    m.falseCount = 0;
+    m.previousId = null;
 
     hideFeedback();
     showScreen("quiz");
     showQuestion();
 }
 
-function leaveQuiz() {
+// Stops whatever quiz is running in the active module: pending next question,
+// feedback pop-up, and the answer lock.
+function stopQuiz() {
     clearTimeout(nextQuestionTimer);
     hideFeedback();
-    answerLocked = false;
-    currentItem = null;
+    if (activeModule) {
+        activeModule.answerLocked = false;
+        activeModule.currentItem = null;
+    }
     answerInput.blur();
+}
 
-    // selectedCards and showYoon are untouched, so the chart restores
-    // exactly as left.
+function leaveQuiz() {
+    stopQuiz();
+
+    // The module's selectedCards and showYoon are untouched, so the chart
+    // restores exactly as left.
     showScreen("selection");
     renderChart();
     updateSelectedCount();
@@ -694,11 +968,121 @@ answerInput.addEventListener("keydown", event => {
 
 
 /* =========================
+   NAVIGATION
+   Single page: the homepage and the selection / quiz screens are shown and
+   hidden, never reloaded. The address bar hash (#hiragana, #katakana, #home)
+   records where you are, so the browser / phone Back button works and a
+   module can be opened directly.
+   ========================= */
+
+// Shows a module's selection screen, restoring everything from its own state.
+function activateModule(m) {
+    activeModule = m;
+
+    moduleTitleEl.textContent = m.name + " Quiz";
+    moduleSubtitleEl.textContent =
+        "Select the " + m.name.toLowerCase() + " you want to practice.";
+    filterButtons.forEach(button => {
+        if (button.dataset.category === "basic") {
+            button.textContent = "Basic " + m.name;
+        }
+    });
+    recognitionHint.textContent = "Romaji → " + m.name + ": Good luck!";
+    document.title = m.name + " Quiz – Japanese Practice";
+
+    practiceModeSelect.value = m.practiceModeChoice;
+    quizModeSelect.value = m.quizModeChoice;
+    updatePracticeModeUI();
+
+    setCategory(m.currentCategory);
+    updateYoonButton();
+    updateSelectedCount();
+}
+
+let currentRoute = null;   // "home", "hiragana" or "katakana"
+
+function showRoute(route) {
+    currentRoute = route;
+
+    // Whatever was running in the module we are leaving stops here.
+    stopQuiz();
+    closeAbout();
+
+    if (route === "home") {
+        activeModule = null;
+        document.title = "Japanese Practice";
+        showScreen("home");
+        return;
+    }
+
+    activateModule(MODULES[route]);
+    showScreen("selection");
+}
+
+function routeFromHash() {
+    const name = location.hash.replace(/^#/, "");
+    return Object.prototype.hasOwnProperty.call(MODULES, name) ? name : "home";
+}
+
+// Buttons: switch screens immediately, then record the move in the address bar.
+function navigate(route) {
+    showRoute(route);
+    if (routeFromHash() !== route) location.hash = route;
+}
+
+// Browser / phone Back and Forward (or an edited address): the hash changed
+// without us, so follow it. Moves made by navigate() are already on screen.
+window.addEventListener("hashchange", () => {
+    const route = routeFromHash();
+    if (route !== currentRoute) showRoute(route);
+});
+
+moduleCards.forEach(card => {
+    card.addEventListener("click", () => navigate(card.dataset.module));
+});
+
+homeButton.addEventListener("click", () => navigate("home"));
+
+
+/* =========================
+   ABOUT
+   ========================= */
+
+function openAbout() {
+    aboutModal.classList.remove("hidden");
+    document.body.classList.add("modal-open");
+    aboutClose.focus();
+}
+
+function closeAbout() {
+    if (aboutModal.classList.contains("hidden")) return;
+    aboutModal.classList.add("hidden");
+    document.body.classList.remove("modal-open");
+    aboutButton.focus();
+}
+
+aboutButton.addEventListener("click", openAbout);
+aboutClose.addEventListener("click", closeAbout);
+
+// Click on the dark backdrop (not on the box) closes it.
+aboutModal.addEventListener("click", event => {
+    if (event.target === aboutModal) closeAbout();
+});
+
+document.addEventListener("keydown", event => {
+    if (aboutModal.classList.contains("hidden")) return;
+    if (event.key === "Escape") {
+        closeAbout();
+    } else if (event.key === "Tab") {
+        // The Close button is the only control in the dialog: keep focus there.
+        event.preventDefault();
+        aboutClose.focus();
+    }
+});
+
+
+/* =========================
    INIT
    ========================= */
 
-setCategory("basic");
-updatePracticeModeUI();
-updateYoonButton();
-updateSelectedCount();
-showScreen("selection");
+showRoute(routeFromHash());

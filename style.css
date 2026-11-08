@@ -45,6 +45,139 @@ button:disabled {
 
 
 /* =========================
+   HOME SCREEN
+   ========================= */
+
+#homeScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-container {
+    width: 90%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.home-container h1 {
+    font-size: 38px;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 34px 0 26px;
+}
+
+.module-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 30px 16px 26px;
+    border: 2px solid #ddd;
+    border-radius: 16px;
+    background: white;
+    color: #222;
+    text-align: center;
+    transition: border-color 0.15s, transform 0.1s;
+    touch-action: manipulation;
+}
+
+/* Hover only on devices that really hover, so it never "sticks" on touch. */
+@media (hover: hover) {
+    .module-card:hover {
+        border-color: #aaa;
+    }
+}
+
+.module-card:active {
+    transform: scale(0.98);
+}
+
+.module-kana {
+    font-size: 64px;
+    line-height: 1.1;
+}
+
+.module-name {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.module-desc {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.about-button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #ddd;
+    color: #222;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.about-button:hover {
+    background: #ccc;
+}
+
+
+/* =========================
+   ABOUT MODAL
+   ========================= */
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.modal-box {
+    width: 100%;
+    max-width: 460px;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    padding: 26px 26px 24px;
+    border-radius: 16px;
+    background: white;
+    text-align: left;
+    line-height: 1.5;
+}
+
+.nowrap {
+    white-space: nowrap;   /* keeps a yōon pair such as きゃ on one line */
+}
+
+.modal-box h2 {
+    margin: 0 0 12px;
+}
+
+.modal-box p {
+    margin: 0 0 12px;
+    color: #444;
+    font-size: 15px;
+}
+
+
+/* =========================
    SELECTION SCREEN
    ========================= */
 
@@ -122,10 +255,10 @@ h1 {
 
 
 /* =========================
-   HIRAGANA CHART
+   KANA CHART (Hiragana and Katakana)
    ========================= */
 
-#hiraganaChart {
+#kanaChart {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
@@ -135,12 +268,12 @@ h1 {
 
 /* Yōon view: one row per consonant group (e.g. きゃ きゅ きょ),
    so the chart is 3 columns wide on every screen size. */
-#hiraganaChart.yoon-view {
+#kanaChart.yoon-view {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     max-width: 450px;
 }
 
-.hiragana-card {
+.kana-card {
     background: white;
     border: 2px solid #ddd;
     border-radius: 12px;
@@ -151,22 +284,22 @@ h1 {
     -webkit-user-select: none;
 }
 
-.hiragana-card:hover {
+.kana-card:hover {
     border-color: #aaa;
 }
 
-.hiragana-card .japanese {
+.kana-card .japanese {
     display: block;
     font-size: 32px;
     margin-bottom: 5px;
 }
 
-.hiragana-card .romaji {
+.kana-card .romaji {
     font-size: 14px;
     color: #777;
 }
 
-.hiragana-card.selected {
+.kana-card.selected {
     border-color: #333;
     background: #e9e9e9;
 }
@@ -266,17 +399,65 @@ h1 {
    BACK BUTTON
    ========================= */
 
+/* Pill-shaped back button: a dark circle with a chevron, then the label */
 .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     align-self: flex-start;
-    border: none;
-    background: none;
-    color: #555;
+    padding: 5px 16px 5px 5px;
+    border: 2px solid #e2e2e2;
+    border-radius: 999px;
+    background: white;
+    color: #444;
     font-size: 15px;
-    padding: 5px 0;
+    font-weight: 600;
+    transition: border-color 0.15s, color 0.15s, transform 0.1s;
 }
 
-.back-button:hover {
-    color: #000;
+.back-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #222;
+    color: white;
+    transition: transform 0.15s;
+}
+
+.back-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Hover only on devices that really hover, so it never "sticks" on touch. */
+@media (hover: hover) {
+    .back-button:hover {
+        border-color: #aaa;
+        color: #000;
+    }
+
+    .back-button:hover .back-icon {
+        transform: translateX(-2px);
+    }
+}
+
+.back-button:active {
+    transform: scale(0.97);
+}
+
+.back-button:focus-visible {
+    outline: 2px solid #222;
+    outline-offset: 2px;
+}
+
+/* "Home" at the top of the selection screen: block-level, aligned left */
+.home-button {
+    display: flex;
+    width: fit-content;
+    margin: 0 0 14px;
 }
 
 
@@ -289,25 +470,72 @@ h1 {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    margin-top: 24px;
-    color: #666;
-    font-size: 14px;
+    margin-top: 18px;
+}
+
+/* "Practice #1" as a soft grey pill */
+#questionNumber {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #f2f2f7;
+    color: #3a3a3c;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
 }
 
 .answer-stats {
     display: flex;
     align-items: center;
-    gap: 14px;
-    font-weight: 700;
+    gap: 8px;
     font-variant-numeric: tabular-nums;
 }
 
+/* Correct / wrong counters: tinted pills with a round icon
+   (same colors as the Correct! / Wrong! pop-up) */
+.true-stat,
+.false-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 12px 4px 5px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
 .true-stat {
-    color: #218348;
+    background: #e6f6eb;
+    color: #176b36;
 }
 
 .false-stat {
-    color: #cf3434;
+    background: #fff0f0;
+    color: #a82020;
+}
+
+.stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: white;
+}
+
+.true-stat .stat-icon {
+    background: #218348;
+}
+
+.false-stat .stat-icon {
+    background: #cf3434;
+}
+
+.stat-icon svg {
+    width: 11px;
+    height: 11px;
 }
 
 
@@ -499,6 +727,34 @@ h1 {
 
 @media (max-width: 600px) {
 
+    .home-container {
+        width: 100%;
+        padding: 36px 12px;
+    }
+
+    .home-container h1 {
+        font-size: 30px;
+    }
+
+    .home-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin: 24px 0 22px;
+    }
+
+    .module-card {
+        padding: 22px 16px 20px;
+        border-radius: 14px;
+    }
+
+    .module-kana {
+        font-size: 52px;
+    }
+
+    .modal-box {
+        padding: 22px 18px 20px;
+    }
+
     .selection-container {
         width: 100%;
         padding: 25px 12px 40px;
@@ -538,23 +794,23 @@ h1 {
         margin-bottom: 15px;
     }
 
-    #hiraganaChart {
+    #kanaChart {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 7px;
         width: 100%;
     }
 
-    .hiragana-card {
+    .kana-card {
         padding: 13px 5px;
         border-radius: 9px;
     }
 
-    .hiragana-card .japanese {
+    .kana-card .japanese {
         font-size: 28px;
         margin-bottom: 3px;
     }
 
-    .hiragana-card .romaji {
+    .kana-card .romaji {
         font-size: 12px;
     }
 
