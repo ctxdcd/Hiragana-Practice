@@ -1,9 +1,10 @@
 /* =========================
    DATA
-   Three separate datasets.
-   Every character's `id` is the hiragana character itself, which is unique
-   across all three sets (checked at startup below). Selection is tracked by
-   id, never by array index, so switching filters can't shift anything.
+   Three separate datasets, plus a Yōon dataset for each of them.
+   Every character's `id` is the hiragana character (or Yōon combination)
+   itself, which is unique across all sets (checked at startup below).
+   Selection is tracked by id, never by array index, so switching filters
+   can't shift anything.
    `alt` lists extra romaji spellings accepted in Japanese → Romaji mode.
    ========================= */
 
@@ -99,17 +100,86 @@ const HANDAKUTEN_HIRAGANA = [
     { id: "ぽ", char: "ぽ", romaji: "po" }
 ];
 
+
+/* =========================
+   YŌON (拗音)
+   Each combination is ONE quiz item (two characters, small ゃ/ゅ/ょ).
+   Its id is the full combination, so it can never collide with a
+   single-character id. ぢゃ / ぢゅ / ぢょ are intentionally left out.
+   ========================= */
+
+const BASIC_YOON = [
+    { id: "きゃ", char: "きゃ", romaji: "kya" },
+    { id: "きゅ", char: "きゅ", romaji: "kyu" },
+    { id: "きょ", char: "きょ", romaji: "kyo" },
+
+    { id: "しゃ", char: "しゃ", romaji: "sha", alt: ["sya"] },
+    { id: "しゅ", char: "しゅ", romaji: "shu", alt: ["syu"] },
+    { id: "しょ", char: "しょ", romaji: "sho", alt: ["syo"] },
+
+    { id: "ちゃ", char: "ちゃ", romaji: "cha", alt: ["tya"] },
+    { id: "ちゅ", char: "ちゅ", romaji: "chu", alt: ["tyu"] },
+    { id: "ちょ", char: "ちょ", romaji: "cho", alt: ["tyo"] },
+
+    { id: "にゃ", char: "にゃ", romaji: "nya" },
+    { id: "にゅ", char: "にゅ", romaji: "nyu" },
+    { id: "にょ", char: "にょ", romaji: "nyo" },
+
+    { id: "ひゃ", char: "ひゃ", romaji: "hya" },
+    { id: "ひゅ", char: "ひゅ", romaji: "hyu" },
+    { id: "ひょ", char: "ひょ", romaji: "hyo" },
+
+    { id: "みゃ", char: "みゃ", romaji: "mya" },
+    { id: "みゅ", char: "みゅ", romaji: "myu" },
+    { id: "みょ", char: "みょ", romaji: "myo" },
+
+    { id: "りゃ", char: "りゃ", romaji: "rya" },
+    { id: "りゅ", char: "りゅ", romaji: "ryu" },
+    { id: "りょ", char: "りょ", romaji: "ryo" }
+];
+
+const DAKUTEN_YOON = [
+    { id: "ぎゃ", char: "ぎゃ", romaji: "gya" },
+    { id: "ぎゅ", char: "ぎゅ", romaji: "gyu" },
+    { id: "ぎょ", char: "ぎょ", romaji: "gyo" },
+
+    { id: "じゃ", char: "じゃ", romaji: "ja", alt: ["jya", "zya"] },
+    { id: "じゅ", char: "じゅ", romaji: "ju", alt: ["jyu", "zyu"] },
+    { id: "じょ", char: "じょ", romaji: "jo", alt: ["jyo", "zyo"] },
+
+    { id: "びゃ", char: "びゃ", romaji: "bya" },
+    { id: "びゅ", char: "びゅ", romaji: "byu" },
+    { id: "びょ", char: "びょ", romaji: "byo" }
+];
+
+const HANDAKUTEN_YOON = [
+    { id: "ぴゃ", char: "ぴゃ", romaji: "pya" },
+    { id: "ぴゅ", char: "ぴゅ", romaji: "pyu" },
+    { id: "ぴょ", char: "ぴょ", romaji: "pyo" }
+];
+
 const CATEGORIES = {
     basic: BASIC_HIRAGANA,
     dakuten: DAKUTEN_HIRAGANA,
     handakuten: HANDAKUTEN_HIRAGANA
 };
 
-// Flat list + lookup by id, built once.
+// The Yōon set that belongs to each category.
+const YOON_CATEGORIES = {
+    basic: BASIC_YOON,
+    dakuten: DAKUTEN_YOON,
+    handakuten: HANDAKUTEN_YOON
+};
+
+// Flat list + lookup by id, built once. Yōon items are included so that
+// selected Yōon cards flow into the quiz pool and answer checking.
 const ALL_HIRAGANA = [
     ...BASIC_HIRAGANA,
     ...DAKUTEN_HIRAGANA,
-    ...HANDAKUTEN_HIRAGANA
+    ...HANDAKUTEN_HIRAGANA,
+    ...BASIC_YOON,
+    ...DAKUTEN_YOON,
+    ...HANDAKUTEN_YOON
 ];
 
 const HIRAGANA_BY_ID = new Map();
@@ -125,10 +195,13 @@ ALL_HIRAGANA.forEach(item => {
    STATE
    ========================= */
 
-// Set of character ids selected across ALL categories.
+// Set of character ids selected across ALL categories and views.
 const selectedCards = new Set();
 
 let currentCategory = "basic";
+
+// One flag shared by all categories, so it survives category switching.
+let showYoon = false;
 
 let quizPool = [];
 let quizMode = "jp-romaji";
@@ -156,6 +229,7 @@ const selectedCountEl = document.getElementById("selectedCount");
 const filterButtons = document.querySelectorAll(".filter-button");
 const selectAllBtn = document.getElementById("selectAll");
 const clearAllBtn = document.getElementById("clearAll");
+const toggleYoonBtn = document.getElementById("toggleYoon");
 const quizModeSelect = document.getElementById("quizMode");
 const startQuizBtn = document.getElementById("startQuiz");
 
@@ -173,10 +247,18 @@ const feedbackEl = document.getElementById("feedback");
    SELECTION SCREEN
    ========================= */
 
+// The cards currently on screen: the active category's Yōon set when
+// Yōon is shown, otherwise its original characters.
+function getVisibleItems() {
+    const source = showYoon ? YOON_CATEGORIES : CATEGORIES;
+    return source[currentCategory];
+}
+
 function renderChart() {
     hiraganaChart.innerHTML = "";
+    hiraganaChart.classList.toggle("yoon-view", showYoon);
 
-    CATEGORIES[currentCategory].forEach(item => {
+    getVisibleItems().forEach(item => {
         const card = document.createElement("div");
         card.className = "hiragana-card";
         card.dataset.id = item.id;
@@ -203,8 +285,13 @@ function renderChart() {
 }
 
 function updateSelectedCount() {
-    // Total across ALL categories, not only the visible one.
+    // Total across ALL categories and views, not only the visible cards.
     selectedCountEl.textContent = selectedCards.size + " selected";
+}
+
+function updateYoonButton() {
+    toggleYoonBtn.textContent = showYoon ? "Hide Yōon" : "Show Yōon";
+    toggleYoonBtn.setAttribute("aria-pressed", showYoon);
 }
 
 function toggleCard(card) {
@@ -255,16 +342,23 @@ filterButtons.forEach(button => {
     button.addEventListener("click", () => setCategory(button.dataset.category));
 });
 
-// Select All: only the currently displayed category.
+// Show / Hide Yōon: swaps the chart for the active category.
+toggleYoonBtn.addEventListener("click", () => {
+    showYoon = !showYoon;
+    updateYoonButton();
+    renderChart();
+});
+
+// Select All: only the cards currently displayed.
 selectAllBtn.addEventListener("click", () => {
-    CATEGORIES[currentCategory].forEach(item => selectedCards.add(item.id));
+    getVisibleItems().forEach(item => selectedCards.add(item.id));
     renderChart();
     updateSelectedCount();
 });
 
-// Clear All: only the currently displayed category.
+// Clear All: only the cards currently displayed.
 clearAllBtn.addEventListener("click", () => {
-    CATEGORIES[currentCategory].forEach(item => selectedCards.delete(item.id));
+    getVisibleItems().forEach(item => selectedCards.delete(item.id));
     renderChart();
     updateSelectedCount();
 });
@@ -330,7 +424,8 @@ function showQuestion() {
 }
 
 function isCorrectAnswer(rawAnswer) {
-    const answer = rawAnswer.trim();
+    // NFC keeps composed and decomposed forms of the same kana equal.
+    const answer = rawAnswer.trim().normalize("NFC");
 
     if (quizMode === "jp-romaji") {
         const normalized = answer.toLowerCase();
@@ -340,6 +435,8 @@ function isCorrectAnswer(rawAnswer) {
 
     // Romaji → Japanese: several characters share a reading (じ/ぢ, ず/づ),
     // so accept any hiragana that has the same romaji as the question.
+    // A Yōon answer must be the full combination (e.g. きゃ), written with
+    // the small ゃ/ゅ/ょ; a single character or a large や/ゆ/よ is wrong.
     return ALL_HIRAGANA.some(
         item => item.romaji === currentItem.romaji && item.char === answer
     );
@@ -377,7 +474,8 @@ function checkAnswer() {
 }
 
 function startQuiz() {
-    // Build the pool from every selected id, whatever category it came from.
+    // Build the pool from every selected id, whatever category or view
+    // (normal or Yōon) it came from.
     quizPool = [];
     selectedCards.forEach(id => {
         const item = HIRAGANA_BY_ID.get(id);
@@ -407,7 +505,8 @@ function leaveQuiz() {
     currentItem = null;
     answerInput.blur();
 
-    // selectedCards is untouched, so the chart restores exactly as left.
+    // selectedCards and showYoon are untouched, so the chart restores
+    // exactly as left.
     showScreen("selection");
     renderChart();
     updateSelectedCount();
@@ -430,5 +529,6 @@ answerInput.addEventListener("keydown", event => {
    ========================= */
 
 setCategory("basic");
+updateYoonButton();
 updateSelectedCount();
 showScreen("selection");

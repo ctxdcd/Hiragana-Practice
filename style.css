@@ -133,6 +133,13 @@ h1 {
     margin: auto;
 }
 
+/* Yōon view: one row per consonant group (e.g. きゃ きゅ きょ),
+   so the chart is 3 columns wide on every screen size. */
+#hiraganaChart.yoon-view {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 450px;
+}
+
 .hiragana-card {
     background: white;
     border: 2px solid #ddd;
