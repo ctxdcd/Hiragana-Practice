@@ -204,7 +204,8 @@ let currentCategory = "basic";
 let showYoon = false;
 
 let quizPool = [];
-let quizMode = "jp-romaji";
+let practiceMode = "writing";   // "writing" (typing) or "recognition" (4 cards)
+let quizMode = "jp-romaji";   // direction of the Writing Quiz only
 let currentItem = null;
 let previousId = null;
 let practiceNumber = 1;
@@ -215,6 +216,12 @@ let nextQuestionTimer = null;
 let feedbackTimer = null;
 
 const FEEDBACK_DELAY = 1100;
+
+// Recognition Practice
+const CHOICE_COUNT = 4;
+let lastCorrectIndex = -1;   // where the correct card was on the last question
+let correctStreak = 0;       // how many questions in a row it sat there
+const MAX_SAME_POSITION = 2; // never more than this many in a row
 
 
 /* =========================
@@ -230,14 +237,20 @@ const filterButtons = document.querySelectorAll(".filter-button");
 const selectAllBtn = document.getElementById("selectAll");
 const clearAllBtn = document.getElementById("clearAll");
 const toggleYoonBtn = document.getElementById("toggleYoon");
+const practiceModeSelect = document.getElementById("practiceMode");
+const quizModeLabel = document.getElementById("quizModeLabel");
 const quizModeSelect = document.getElementById("quizMode");
+const recognitionHint = document.getElementById("recognitionHint");
 const startQuizBtn = document.getElementById("startQuiz");
+const startMessage = document.getElementById("startMessage");
 
 const backButton = document.getElementById("backButton");
 const questionNumberEl = document.getElementById("questionNumber");
 const trueCountEl = document.getElementById("trueCount");
 const falseCountEl = document.getElementById("falseCount");
 const questionEl = document.getElementById("question");
+const answerArea = document.getElementById("answerArea");
+const choiceArea = document.getElementById("choiceArea");
 const answerInput = document.getElementById("answerInput");
 const checkAnswerBtn = document.getElementById("checkAnswer");
 const feedbackEl = document.getElementById("feedback");
@@ -287,6 +300,7 @@ function renderChart() {
 function updateSelectedCount() {
     // Total across ALL categories and views, not only the visible cards.
     selectedCountEl.textContent = selectedCards.size + " selected";
+    hideStartMessage();
 }
 
 function updateYoonButton() {
@@ -410,6 +424,11 @@ function showQuestion() {
     currentItem = pickNextItem();
     previousId = currentItem.id;
 
+    if (practiceMode === "recognition") {
+        showRecognitionQuestion();
+        return;
+    }
+
     questionEl.textContent =
         quizMode === "jp-romaji" ? currentItem.char : currentItem.romaji;
 
@@ -453,13 +472,18 @@ function checkAnswer() {
 
     answerLocked = true;
 
-    if (isCorrectAnswer(rawAnswer)) {
+    const correctText =
+        quizMode === "jp-romaji" ? currentItem.romaji : currentItem.char;
+    resolveAnswer(isCorrectAnswer(rawAnswer), correctText);
+}
+
+// Shared by both modes: counters, feedback, and the automatic next question.
+function resolveAnswer(isCorrect, correctText) {
+    if (isCorrect) {
         trueCount++;
         showFeedback("Correct!", true);
     } else {
         falseCount++;
-        const correctText =
-            quizMode === "jp-romaji" ? currentItem.romaji : currentItem.char;
         showFeedback("Wrong! Answer: " + correctText, false);
     }
 
@@ -473,6 +497,134 @@ function checkAnswer() {
     }, FEEDBACK_DELAY);
 }
 
+
+/* =========================
+   RECOGNITION PRACTICE
+   Romaji prompt, four hiragana cards. Uses the same quizPool, counters,
+   feedback and timing as the Writing Quiz.
+   ========================= */
+
+function shuffle(list) {
+    const copy = list.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+// Recognition needs 4 different READINGS in the pool, not just 4 characters:
+// じ/ぢ and ず/づ share a reading, so showing both would give two right answers.
+function countReadings(items) {
+    return new Set(items.map(item => item.romaji)).size;
+}
+
+function buildChoices(correct) {
+    // Group the other pool items by reading (the correct reading is excluded,
+    // so no distractor can also be a correct answer).
+    const groups = new Map();
+    quizPool.forEach(item => {
+        if (item.romaji === correct.romaji) return;
+        if (!groups.has(item.romaji)) groups.set(item.romaji, []);
+        groups.get(item.romaji).push(item);
+    });
+
+    // Three random, different readings; one random character from each.
+    const distractors = shuffle([...groups.keys()])
+        .slice(0, CHOICE_COUNT - 1)
+        .map(reading => {
+            const group = groups.get(reading);
+            return group[Math.floor(Math.random() * group.length)];
+        });
+
+    const choices = shuffle([correct, ...distractors]);
+
+    // The shuffle is already uniform; this only stops a long run of the
+    // correct card landing in the same slot.
+    let index = choices.indexOf(correct);
+    if (index === lastCorrectIndex && correctStreak >= MAX_SAME_POSITION) {
+        let other;
+        do {
+            other = Math.floor(Math.random() * choices.length);
+        } while (other === index);
+        [choices[index], choices[other]] = [choices[other], choices[index]];
+        index = other;
+    }
+    correctStreak = index === lastCorrectIndex ? correctStreak + 1 : 1;
+    lastCorrectIndex = index;
+
+    return choices;
+}
+
+function showRecognitionQuestion() {
+    questionEl.textContent = currentItem.romaji;
+
+    choiceArea.innerHTML = "";
+    choiceArea.classList.remove("locked");
+    choiceArea.setAttribute(
+        "aria-label", "Choose the hiragana for " + currentItem.romaji
+    );
+
+    buildChoices(currentItem).forEach(item => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "choice-card";
+        card.dataset.id = item.id;
+        card.textContent = item.char;
+        choiceArea.appendChild(card);
+    });
+
+    answerLocked = false;
+    updateStats();
+}
+
+function chooseAnswer(card) {
+    // One answer per question.
+    if (answerLocked || !currentItem || practiceMode !== "recognition") return;
+    answerLocked = true;
+
+    const isCorrect = card.dataset.id === currentItem.id;
+
+    choiceArea.classList.add("locked");
+    card.classList.add("selected");
+    Array.from(choiceArea.children).forEach(other => {
+        if (other.dataset.id === currentItem.id) other.classList.add("correct");
+    });
+    if (!isCorrect) card.classList.add("wrong");
+
+    resolveAnswer(isCorrect, currentItem.char);
+}
+
+choiceArea.addEventListener("click", event => {
+    const card = event.target.closest(".choice-card");
+    if (card) chooseAnswer(card);
+});
+
+
+/* =========================
+   PRACTICE SETUP
+   ========================= */
+
+function showStartMessage(text) {
+    startMessage.textContent = text;
+    startMessage.classList.remove("hidden");
+}
+
+function hideStartMessage() {
+    startMessage.classList.add("hidden");
+}
+
+// Quiz Mode (direction) belongs to the Writing Quiz only.
+function updatePracticeModeUI() {
+    const recognition = practiceModeSelect.value === "recognition";
+    quizModeLabel.classList.toggle("hidden", recognition);
+    quizModeSelect.classList.toggle("hidden", recognition);
+    recognitionHint.classList.toggle("hidden", !recognition);
+    hideStartMessage();
+}
+
+practiceModeSelect.addEventListener("change", updatePracticeModeUI);
+
 function startQuiz() {
     // Build the pool from every selected id, whatever category or view
     // (normal or Yōon) it came from.
@@ -482,12 +634,29 @@ function startQuiz() {
         if (item) quizPool.push(item);
     });
 
-    if (quizPool.length === 0) {
+    const recognition = practiceModeSelect.value === "recognition";
+
+    if (quizPool.length === 0 && !recognition) {
         selectedCountEl.textContent = "Select at least one hiragana to start";
         return;
     }
 
+    if (recognition && countReadings(quizPool) < CHOICE_COUNT) {
+        showStartMessage(
+            "Select at least " + CHOICE_COUNT + " characters with different " +
+            "readings to start Recognition Practice."
+        );
+        return;
+    }
+
+    hideStartMessage();
+    practiceMode = recognition ? "recognition" : "writing";
+    answerArea.classList.toggle("hidden", recognition);
+    choiceArea.classList.toggle("hidden", !recognition);
+
     quizMode = quizModeSelect.value;
+    lastCorrectIndex = -1;
+    correctStreak = 0;
     practiceNumber = 1;
     trueCount = 0;
     falseCount = 0;
@@ -529,6 +698,7 @@ answerInput.addEventListener("keydown", event => {
    ========================= */
 
 setCategory("basic");
+updatePracticeModeUI();
 updateYoonButton();
 updateSelectedCount();
 showScreen("selection");

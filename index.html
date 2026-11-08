@@ -126,16 +126,30 @@
 
             <div class="start-container">
 
-                <label for="quizMode">Quiz Mode:</label>
+                <label for="practiceMode">Practice Mode:</label>
+
+                <select id="practiceMode">
+                    <option value="writing">Writing Quiz</option>
+                    <option value="recognition">Recognition Practice</option>
+                </select>
+
+                <!-- Quiz Mode applies to the Writing Quiz only -->
+                <label id="quizModeLabel" for="quizMode">Quiz Mode:</label>
 
                 <select id="quizMode">
                     <option value="jp-romaji">Japanese → Romaji</option>
                     <option value="romaji-jp">Romaji → Japanese</option>
                 </select>
 
+                <p id="recognitionHint" class="mode-hint hidden">
+                    Romaji → Hiragana: Good luck!
+                </p>
+
                 <button id="startQuiz" class="start-button" type="button">
                     Start Endless Practice
                 </button>
+
+                <p id="startMessage" class="start-message hidden" role="alert"></p>
 
             </div>
 
@@ -164,7 +178,7 @@
                 <p id="question"></p>
             </div>
 
-            <div class="answer-area">
+            <div id="answerArea" class="answer-area">
                 <input
                     type="text"
                     id="answerInput"
@@ -179,6 +193,9 @@
                     Check Answer
                 </button>
             </div>
+
+            <!-- Recognition Practice: four answer cards (replaces the input) -->
+            <div id="choiceArea" class="choice-area hidden" role="group" aria-label="Answer choices"></div>
 
             <!-- Result message appears here -->
             <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
